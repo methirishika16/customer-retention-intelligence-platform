@@ -14,34 +14,15 @@ PUT gzips each file (olist_customers_dataset.csv -> .csv.gz). That is fine:
 the COPY INTO patterns in 04_load_raw_tables.sql match both .csv and .csv.gz.
 """
 
-import os
 import sys
 from pathlib import Path
 
-import snowflake.connector
-from dotenv import load_dotenv
-
 from inspect_dataset import EXPECTED
+from retention.snowflake_io import connect
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = PROJECT_ROOT / "data" / "raw"
 STAGE = "@CRI_DB.RAW.OLIST_STAGE"
-
-
-def connect():
-    load_dotenv(PROJECT_ROOT / ".env")
-    params = {
-        "account": os.environ["SNOWFLAKE_ACCOUNT"],
-        "user": os.environ["SNOWFLAKE_USER"],
-        "password": os.environ.get("SNOWFLAKE_PASSWORD"),
-        "role": os.environ.get("SNOWFLAKE_ROLE", "SYSADMIN"),
-        "warehouse": os.environ.get("SNOWFLAKE_WAREHOUSE", "CRI_WH"),
-        "database": os.environ.get("SNOWFLAKE_DATABASE", "CRI_DB"),
-        "schema": os.environ.get("SNOWFLAKE_SCHEMA", "RAW"),
-    }
-    if os.environ.get("SNOWFLAKE_AUTHENTICATOR"):
-        params["authenticator"] = os.environ["SNOWFLAKE_AUTHENTICATOR"]
-    return snowflake.connector.connect(**params)
 
 
 def main() -> int:
@@ -51,6 +32,7 @@ def main() -> int:
         return 1
 
     with connect() as conn, conn.cursor() as cur:
+        cur.execute("USE SCHEMA CRI_DB.RAW")
         for file_name in EXPECTED:
             # Forward slashes + quotes so paths with spaces work on every OS.
             local = (DATA_DIR / file_name).as_posix()
