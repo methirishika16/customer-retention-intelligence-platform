@@ -1,0 +1,60 @@
+version: 2
+
+models:
+  - name: kpi_summary
+    description: One row of headline KPIs across all valid purchases.
+    columns:
+      - name: total_revenue
+        description: Sum of order_revenue for valid purchases (BRL).
+      - name: total_orders
+        description: Number of valid purchases.
+      - name: unique_customers
+        description: Number of distinct customer_unique_id with a valid purchase.
+      - name: avg_order_value
+        description: total_revenue / total_orders.
+      - name: items_per_order
+        description: Total items / total orders.
+      - name: repeat_customers
+        description: Customers with 2+ valid purchases.
+      - name: repeat_purchase_rate
+        description: repeat_customers / unique_customers (0-1).
+      - name: avg_orders_per_customer
+        description: Average purchase frequency.
+      - name: median_days_between_purchases_repeaters
+        description: Typical gap between purchases among repeat customers. Helps choose activity thresholds.
+
+  - name: monthly_revenue
+    description: One row per purchase month with revenue, orders, customers, AOV and new vs returning split.
+    columns:
+      - name: purchase_month
+        data_tests: [unique, not_null]
+      - name: new_customers
+        description: Customers whose first-ever purchase was in this month.
+      - name: returning_customers
+        description: Customers buying this month whose first purchase was in an earlier month.
+      - name: returning_customer_share
+        description: returning_customers / unique_customers.
+      - name: is_low_volume_month
+        description: TRUE when the month has fewer than 100 orders. Exclude from trend analysis.
+
+  - name: customer_acquisition_monthly
+    description: One row per acquisition month (cohort) with size, repeat rate and revenue to date.
+    columns:
+      - name: acquisition_month
+        data_tests: [unique, not_null]
+      - name: cohort_repeat_rate
+        description: Share of the cohort that bought again. Newer cohorts have had less time to return.
+      - name: months_observed
+        description: Months between the cohort month and the end of the data.
+
+  - name: category_performance
+    description: One row per English product category with items, orders, customers, item revenue and reviews.
+    columns:
+      - name: product_category
+        data_tests: [unique, not_null]
+      - name: item_revenue
+        description: Sum of item prices in the category (BRL, excludes freight).
+      - name: item_revenue_share
+        description: Category share of total item revenue (0-1).
+      - name: avg_review_score
+        description: Average review score of orders containing the category.

@@ -1,0 +1,170 @@
+version: 2
+
+models:
+  - name: stg_olist__customers
+    description: >
+      One row per order-level customer_id, with tidied location fields.
+      customer_id is created fresh for every order. Use customer_unique_id to follow a person.
+    columns:
+      - name: customer_id
+        description: Order-level customer key (one per order). Joins to stg_olist__orders.
+        data_tests: [unique, not_null]
+      - name: customer_unique_id
+        description: The real customer. Repeats across all of that person's orders.
+        data_tests: [not_null]
+      - name: customer_zip_code_prefix
+        description: First 5 digits of the zip code, left-padded with zeros.
+      - name: customer_city
+        description: City, lower-case.
+      - name: customer_state
+        description: 2-letter Brazilian state code, upper-case.
+
+  - name: stg_olist__orders
+    description: One row per order. Renamed date columns, impossible dates nulled out, plus simple flags.
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_olist__customers')
+                field: customer_id
+      - name: order_status
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [delivered, shipped, canceled, unavailable, invoiced, processing, created, approved]
+      - name: purchased_at
+        description: When the customer placed the order.
+        data_tests: [not_null]
+      - name: approved_at
+        description: When payment was approved. NULL if never approved.
+      - name: shipped_to_carrier_at
+        description: When the seller handed the order to the carrier. NULL if unknown or impossible (before purchase).
+      - name: delivered_at
+        description: When the customer received the order. NULL if not delivered or impossible.
+      - name: estimated_delivery_at
+        description: Delivery date promised at purchase.
+      - name: has_date_quality_issue
+        description: TRUE when the source dates were inconsistent (e.g. carrier date before purchase).
+      - name: purchase_date
+        description: Purchase timestamp truncated to the day.
+      - name: purchase_month
+        description: First day of the purchase month. Use for monthly reporting.
+      - name: is_valid_purchase
+        description: FALSE for canceled or unavailable orders. Only valid purchases count toward revenue and customer metrics.
+        data_tests: [not_null]
+
+  - name: stg_olist__order_items
+    description: One row per item in an order.
+    columns:
+      - name: order_item_key
+        description: order_id + item number. Unique key.
+        data_tests: [unique, not_null]
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_olist__orders')
+                field: order_id
+      - name: order_item_number
+        description: Item position within the order (1, 2, 3...).
+      - name: product_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_olist__products')
+                field: product_id
+      - name: seller_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_olist__sellers')
+                field: seller_id
+      - name: item_price
+        description: Price of this item in BRL (product only, no freight).
+        data_tests: [not_null]
+      - name: freight_value
+        description: Shipping charged for this item in BRL.
+
+  - name: stg_olist__order_payments
+    description: One row per payment method used on an order.
+    columns:
+      - name: order_payment_key
+        data_tests: [unique, not_null]
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_olist__orders')
+                field: order_id
+      - name: payment_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [credit_card, boleto, voucher, debit_card, not_defined]
+      - name: payment_installments
+        description: Number of installments (minimum 1; 0 in the source was corrected to 1).
+      - name: payment_value
+        description: Amount paid with this method in BRL.
+        data_tests: [not_null]
+
+  - name: stg_olist__order_reviews
+    description: One row per (review, order) pair from the satisfaction survey.
+    columns:
+      - name: review_order_key
+        data_tests: [unique, not_null]
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_olist__orders')
+                field: order_id
+      - name: review_score
+        description: Satisfaction score from 1 (worst) to 5 (best).
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+                quote: false
+      - name: has_comment
+        description: TRUE if the customer wrote a comment.
+
+  - name: stg_olist__products
+    description: One row per product, with typo-free column names.
+    columns:
+      - name: product_id
+        data_tests: [unique, not_null]
+      - name: product_category_name_pt
+        description: Category in Portuguese. NULL for 610 uncategorised products.
+      - name: product_weight_g
+        description: Weight in grams. NULL when unknown (0 in source is treated as unknown).
+
+  - name: stg_olist__product_category_translation
+    columns:
+      - name: product_category_name_pt
+        data_tests: [unique, not_null]
+      - name: product_category_name_en
+        data_tests: [not_null]
+
+  - name: stg_olist__sellers
+    columns:
+      - name: seller_id
+        data_tests: [unique, not_null]
+
+  - name: stg_olist__geolocation
+    description: One row per zip code prefix with an average latitude/longitude (points outside Brazil removed).
+    columns:
+      - name: zip_code_prefix
+        data_tests: [unique, not_null]
+      - name: source_point_count
+        description: How many RAW sample points were averaged.

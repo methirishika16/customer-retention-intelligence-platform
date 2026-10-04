@@ -1,0 +1,63 @@
+version: 2
+
+# Sources = the RAW tables loaded in Sprint 1. dbt reads them with {{ source('olist', '<table>') }}.
+# These tests re-check the Sprint 1 key rules every time dbt runs.
+
+sources:
+  - name: olist
+    description: Olist Brazilian e-commerce data loaded 1:1 from the Kaggle CSV files (Sprint 1).
+    database: CRI_DB
+    schema: RAW
+    tables:
+      - name: customers
+        description: One row per order-level customer_id. customer_unique_id identifies the real person.
+        columns:
+          - name: customer_id
+            data_tests: [unique, not_null]
+          - name: customer_unique_id
+            data_tests: [not_null]
+
+      - name: orders
+        description: One row per order.
+        columns:
+          - name: order_id
+            data_tests: [unique, not_null]
+          - name: customer_id
+            data_tests: [not_null]
+
+      - name: order_items
+        description: One row per item within an order.
+        columns:
+          - name: order_id
+            data_tests: [not_null]
+
+      - name: order_payments
+        description: One row per payment method used on an order.
+        columns:
+          - name: order_id
+            data_tests: [not_null]
+
+      - name: order_reviews
+        description: One row per (review_id, order_id). review_id alone is NOT unique.
+        columns:
+          - name: order_id
+            data_tests: [not_null]
+
+      - name: products
+        description: One row per product. Column names contain source typos ("lenght").
+        columns:
+          - name: product_id
+            data_tests: [unique, not_null]
+
+      - name: sellers
+        columns:
+          - name: seller_id
+            data_tests: [unique, not_null]
+
+      - name: geolocation
+        description: Many sample points per zip code prefix. No unique key.
+
+      - name: product_category_translation
+        columns:
+          - name: product_category_name
+            data_tests: [unique, not_null]

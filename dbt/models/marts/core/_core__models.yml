@@ -1,0 +1,174 @@
+version: 2
+
+models:
+  - name: fct_orders
+    description: >
+      One row per order (all statuses). The central fact table.
+      Filter on is_valid_purchase = TRUE for revenue and customer metrics.
+    columns:
+      - name: order_id
+        description: Unique order identifier.
+        data_tests: [unique, not_null]
+      - name: customer_unique_id
+        description: The real customer who placed the order.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_unique_id
+              config:
+                where: "is_valid_purchase"
+      - name: order_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [delivered, shipped, canceled, unavailable, invoiced, processing, created, approved]
+      - name: is_valid_purchase
+        description: FALSE for canceled/unavailable orders.
+        data_tests: [not_null]
+      - name: customer_order_number
+        description: Position in the customer's purchase history (1 = first). NULL for invalid orders.
+      - name: is_first_purchase
+        description: TRUE for the customer's first valid purchase.
+      - name: purchase_month
+        description: First day of the purchase month.
+      - name: item_count
+        description: Number of items in the order.
+      - name: items_subtotal
+        description: Product value of the order (BRL), no freight.
+      - name: freight_total
+        description: Freight charged (BRL).
+      - name: order_revenue
+        description: "**Revenue definition:** amount paid by the customer (products + freight, BRL)."
+        data_tests: [not_null]
+      - name: review_score_avg
+        description: Average review score for the order (1-5). NULL if no review.
+      - name: delivery_days
+        description: Days from purchase to delivery. NULL if not delivered.
+      - name: is_late_delivery
+        description: Delivered after the promised date.
+      - name: days_late
+        description: Days after the promised date (0 = on time).
+
+  - name: dim_customers
+    description: >
+      **The customer-level analytical model.** One row per real customer (customer_unique_id) with
+      at least one valid purchase: acquisition, frequency, spend, basket size, experience and recency.
+      Recency is measured from as_of_date (the last purchase date in the data), not from today.
+    columns:
+      - name: customer_unique_id
+        description: The real customer.
+        data_tests: [unique, not_null]
+      - name: customer_state
+        description: State from the customer's most recent order.
+      - name: first_purchase_date
+        description: Date of the first valid purchase.
+      - name: acquisition_month
+        description: Month of the first valid purchase (the month the customer was acquired).
+        data_tests: [not_null]
+      - name: last_purchase_date
+        description: Date of the most recent valid purchase.
+      - name: order_count
+        description: Number of valid purchases (purchase frequency).
+        data_tests: [not_null]
+      - name: is_repeat_customer
+        description: TRUE if the customer made 2 or more valid purchases.
+      - name: total_revenue
+        description: Total amount the customer paid across all valid orders (BRL).
+        data_tests: [not_null]
+      - name: avg_order_value
+        description: total_revenue / order_count.
+      - name: items_per_order
+        description: Average number of items per order.
+      - name: avg_review_score
+        description: Average review score across the customer's orders.
+      - name: late_delivery_count
+        description: Number of the customer's orders delivered late.
+      - name: days_since_last_purchase
+        description: Days between last_purchase_date and as_of_date (Recency).
+        data_tests: [not_null]
+      - name: customer_tenure_days
+        description: Days between first and last purchase (0 for one-time buyers).
+      - name: avg_days_between_purchases
+        description: Average gap between purchases. NULL for one-time buyers.
+      - name: as_of_date
+        description: Reference "today" for recency = last purchase date in the dataset.
+
+  - name: dim_products
+    description: One row per product with an English category name.
+    columns:
+      - name: product_id
+        data_tests: [unique, not_null]
+      - name: product_category
+        description: English category; Portuguese if untranslated; 'unknown' if missing.
+        data_tests: [not_null]
+
+  - name: customer_rfm
+    description: >
+      One row per customer: all dim_customers columns plus RFM scores (1-5), an RFM segment,
+      a high-value flag, an activity status and a rule-based retention priority.
+      **Use this table to answer the business question.**
+    columns:
+      - name: customer_unique_id
+        data_tests: [unique, not_null]
+      - name: r_score
+        description: Recency score. 5 = bought most recently (top 20%), 1 = longest ago.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+                quote: false
+      - name: f_score
+        description: "Frequency score from order count: 1 order = 1, 2 = 2, 3 = 3, 4 = 4, 5+ = 5."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+                quote: false
+      - name: m_score
+        description: Monetary score. 5 = top 20% by total spend, 1 = bottom 20%.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+                quote: false
+      - name: rfm_cell
+        description: The three scores together, e.g. "515".
+      - name: rfm_total_score
+        description: r_score + f_score + m_score (3-15).
+      - name: rfm_segment
+        description: Customer segment derived from the RFM scores (see model SQL for the rules).
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - Champions
+                  - Loyal Customers
+                  - At-Risk Repeat Customers
+                  - High-Value Recent
+                  - High-Value Lapsing
+                  - Recent One-Time Buyers
+                  - Needs Attention
+                  - Hibernating
+                  - Lost
+      - name: is_high_value
+        description: TRUE for top-20% spenders, or repeat customers in the top 40% of spend.
+        data_tests: [not_null]
+      - name: activity_status
+        description: "Active (<= active_days since last purchase), Cooling, or Inactive (> inactive_days). Thresholds are dbt vars."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [Active, Cooling, Inactive]
+      - name: retention_priority
+        description: "1 = contact first (high value & cooling) ... 4 = standard. Rule-based v1."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4]
+                quote: false

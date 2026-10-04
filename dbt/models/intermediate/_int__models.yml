@@ -1,0 +1,57 @@
+version: 2
+
+models:
+  - name: int_order_items__per_order
+    description: Item rows rolled up to one row per order (item count, subtotal, freight).
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: item_count
+        description: Number of items (rows) in the order.
+      - name: items_subtotal
+        description: Sum of item prices (BRL), excluding freight.
+      - name: freight_total
+        description: Sum of freight charged (BRL).
+      - name: items_gross_total
+        description: items_subtotal + freight_total.
+
+  - name: int_order_payments__per_order
+    description: Payment rows rolled up to one row per order.
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: payment_total
+        description: Total amount paid by the customer for the order (BRL).
+      - name: main_payment_type
+        description: Payment method that covered the largest amount.
+
+  - name: int_order_reviews__per_order
+    description: Review rows rolled up to one row per order.
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: review_score_avg
+        description: Average review score (1-5) for the order.
+
+  - name: int_orders__enriched
+    description: >
+      One row per order with the real customer (customer_unique_id), money, delivery and review
+      information, and the order's position in the customer's purchase history.
+      This is the main building block for every mart.
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: customer_unique_id
+        description: The real customer.
+        data_tests: [not_null]
+      - name: order_revenue
+        description: Amount paid by the customer (products + freight), BRL. Falls back to items + freight when no payment exists.
+        data_tests: [not_null]
+      - name: customer_order_number
+        description: 1 for a customer's first valid purchase, 2 for the second, etc. NULL for canceled/unavailable orders.
+      - name: is_first_purchase
+        description: TRUE for a customer's first valid purchase.
+      - name: is_late_delivery
+        description: TRUE if delivered after the promised date. NULL when not delivered.
+      - name: days_late
+        description: Days delivered after the promised date (0 if on time). NULL when not delivered.

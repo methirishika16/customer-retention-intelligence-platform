@@ -1,0 +1,34 @@
+# dbt project for the Customer Retention Intelligence Platform.
+# Run every dbt command from this dbt/ folder.
+
+name: cri
+version: "1.0.0"
+profile: cri            # connection settings live in ~/.dbt/profiles.yml (not in Git)
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+clean-targets: ["target", "dbt_packages"]
+
+vars:
+  # Business rules for customer activity, in days since last purchase.
+  # Measured from the dataset's last purchase date, not today's date.
+  # Starting assumptions; check them with snowflake/05_dbt_validation/10_validate_dbt_models.sql.
+  active_days: 180      # bought within the last 6 months   -> Active
+  inactive_days: 365    # no purchase for more than a year  -> Inactive (in between = Cooling)
+
+models:
+  cri:
+    staging:            # 1:1 with RAW tables: rename, cast, clean
+      +schema: staging
+      +materialized: view
+    intermediate:       # reusable building blocks (order-level joins & aggregates)
+      +schema: intermediate
+      +materialized: view
+    marts:              # final tables used by Python, Tableau and Streamlit
+      +schema: marts
+      +materialized: table
+
+data_tests:
+  +severity: error
