@@ -58,3 +58,27 @@ models:
         description: Category share of total item revenue (0-1).
       - name: avg_review_score
         description: Average review score of orders containing the category.
+
+  - name: cohort_retention
+    description: >
+      Cohort retention grid. One row per acquisition month x months since acquisition.
+      retention_rate = share of the cohort that purchased again N months after their first purchase.
+      Month 0 is 100% by definition. Months after the last full month of data are excluded.
+    columns:
+      - name: cohort_key
+        description: "acquisition month + months since acquisition, e.g. '2017-03+2'."
+        data_tests: [unique, not_null]
+      - name: acquisition_month
+        description: Month of the cohort's first purchase.
+        data_tests: [not_null]
+      - name: months_since_acquisition
+        description: 0 = acquisition month, 1 = the following month, ...
+        data_tests: [not_null]
+      - name: cohort_customers
+        description: Customers acquired in that month.
+      - name: active_customers
+        description: Cohort customers with a valid purchase in that month.
+      - name: retention_rate
+        description: active_customers / cohort_customers (0-1).
+      - name: is_small_cohort
+        description: TRUE for cohorts under 100 customers (2016-09, 2016-12). Exclude from averages.

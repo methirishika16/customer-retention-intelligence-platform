@@ -6,7 +6,6 @@ version: "1.0.0"
 profile: cri            # connection settings live in ~/.dbt/profiles.yml (not in Git)
 
 model-paths: ["models"]
-analysis-paths: ["analyses"]
 test-paths: ["tests"]
 macro-paths: ["macros"]
 clean-targets: ["target", "dbt_packages"]

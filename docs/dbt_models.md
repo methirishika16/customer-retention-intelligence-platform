@@ -8,7 +8,7 @@ flowchart LR
     STG["STAGING (views)<br/>rename · cast · clean"]
     INT["INTERMEDIATE (views)<br/>order-level joins & roll-ups"]
     MARTS[("MARTS (tables)<br/>facts, dimensions, metrics, RFM")]
-    USE["🐍 Python · 📊 Tableau · 🖥️ Streamlit"]
+    USE["🐍 Python · 📊 Tableau"]
     RAW --> STG --> INT --> MARTS --> USE
 ```
 
@@ -29,7 +29,7 @@ With dbt it is version-controlled, tested, documented and rebuilt with one comma
 |---|---|---|---|
 | **Staging** | `CRI_DB.STAGING` | views | One model per RAW table. Rename, cast, fix obvious issues. **No joins.** |
 | **Intermediate** | `CRI_DB.INTERMEDIATE` | views | Reusable building blocks: roll-ups and joins. Not used directly by dashboards. |
-| **Marts** | `CRI_DB.MARTS` | tables | Final, business-ready tables. This is what Python, Tableau and Streamlit read. |
+| **Marts** | `CRI_DB.MARTS` | tables | Final, business-ready tables. This is what Python and Tableau read. |
 
 Views cost nothing to store and are always up to date. Marts are tables so dashboards are fast.
 
@@ -80,6 +80,7 @@ An order with 3 items and 2 payments would appear 6 times and inflate revenue. R
 | `monthly_revenue` | month | Revenue, orders, customers, AOV, items/order, **new vs returning customers and revenue**, cumulative revenue. |
 | `customer_acquisition_monthly` | acquisition month | New customers acquired, how many came back, cohort revenue. |
 | `category_performance` | product category | Items, orders, customers, item revenue, share, rank, average review. |
+| `cohort_retention` | acquisition month × months since | Share of each monthly cohort that bought again 1, 2, 3… months later (added in Sprint 4 for the retention dashboard). |
 
 ---
 

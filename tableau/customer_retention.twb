@@ -1,0 +1,824 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<workbook original-version='18.1' source-build='2024.2.0 (20242.24.0613.0835)' source-platform='mac' version='18.1' xmlns:user='http://www.tableausoftware.com/xml/user'>
+  <preferences>
+    <preference name='ui.encoding.shelf.height' value='24' />
+    <preference name='ui.shelf.height' value='26' />
+  </preferences>
+  <datasources><datasource hasconnection='false' inline='true' name='Parameters' version='18.1'><aliases enabled='yes' /><column caption='Marketing Budget (R$)' datatype='real' name='[Parameter 1]' param-domain-type='range' role='measure' type='quantitative' value='25000.'><calculation class='tableau' formula='25000.' /><range granularity='5000.' max='200000.' min='0.' /></column></datasource>
+    <datasource caption='customers' inline='true' name='federated.customers' version='18.1'>
+      <connection class='federated'>
+        <named-connections>
+          <named-connection caption='customers' name='textscan.customers'>
+            <connection class='textscan' directory="/Users/rishikamethi/Documents/customer-retention-intelligence-platform/tableau/data" filename='customers.csv' password='' server='' />
+          </named-connection>
+        </named-connections>
+        <relation connection='textscan.customers' name='customers.csv' table='[customers#csv]' type='table'>
+          <columns character-set='UTF-8' header='yes' locale='en_US' separator=','><column datatype='string' name='customer_unique_id' ordinal='0' /><column datatype='string' name='customer_state' ordinal='1' /><column datatype='date' name='first_purchase_date' ordinal='2' /><column datatype='date' name='last_purchase_date' ordinal='3' /><column datatype='real' name='recency_days' ordinal='4' /><column datatype='integer' name='order_count' ordinal='5' /><column datatype='integer' name='purchase_days' ordinal='6' /><column datatype='real' name='total_revenue' ordinal='7' /><column datatype='real' name='avg_order_value' ordinal='8' /><column datatype='real' name='tenure_days' ordinal='9' /><column datatype='real' name='items_per_order' ordinal='10' /><column datatype='real' name='avg_review_score_observed' ordinal='11' /><column datatype='integer' name='had_late_delivery' ordinal='12' /><column datatype='integer' name='is_repeat_customer' ordinal='13' /><column datatype='string' name='rfm_segment' ordinal='14' /><column datatype='integer' name='r_score' ordinal='15' /><column datatype='integer' name='f_score' ordinal='16' /><column datatype='integer' name='m_score' ordinal='17' /><column datatype='string' name='activity_status' ordinal='18' /><column datatype='string' name='value_tier' ordinal='19' /><column datatype='real' name='return_probability' ordinal='20' /><column datatype='real' name='expected_revenue_180d' ordinal='21' /><column datatype='string' name='risk_tier' ordinal='22' /><column datatype='string' name='customer_group' ordinal='23' /><column datatype='string' name='next_best_action' ordinal='24' /><column datatype='string' name='action_reason' ordinal='25' /><column datatype='real' name='action_cost_brl' ordinal='26' /><column datatype='real' name='priority_score' ordinal='27' /><column datatype='integer' name='priority_rank' ordinal='28' /><column datatype='real' name='cumulative_action_cost_brl' ordinal='29' /><column datatype='date' name='scored_as_of' ordinal='30' /><column datatype='string' name='model_version' ordinal='31' /><column datatype='date' name='acquisition_month' ordinal='32' /><column datatype='real' name='avg_review_score' ordinal='33' /><column datatype='integer' name='late_delivery_count' ordinal='34' /></columns>
+        </relation>
+      </connection>
+      <aliases enabled='yes' />
+      <column caption="KPI Revenue (M)" datatype='real' name='[Calculation_kpi_revenue_m]' role='measure' type='quantitative'><calculation class='tableau' formula="ROUND(SUM([total_revenue]) / 1000000, 2)" /></column><column caption="KPI Orders" datatype='integer' name='[Calculation_kpi_orders]' role='measure' type='quantitative'><calculation class='tableau' formula="SUM([order_count])" /></column><column caption="KPI Customers" datatype='integer' name='[Calculation_kpi_customers]' role='measure' type='quantitative'><calculation class='tableau' formula="COUNTD([customer_unique_id])" /></column><column caption="KPI AOV" datatype='real' name='[Calculation_kpi_aov]' role='measure' type='quantitative'><calculation class='tableau' formula="ROUND(SUM([total_revenue]) / SUM([order_count]), 2)" /></column><column caption="KPI Repeat Rate %" datatype='real' name='[Calculation_kpi_repeat_pct]' role='measure' type='quantitative'><calculation class='tableau' formula="ROUND(100 * SUM(IIF([order_count] &gt;= 2, 1, 0)) / COUNT([customer_unique_id]), 2)" /></column><column caption="KPI High-Value Customers" datatype='integer' name='[Calculation_kpi_high_value]' role='measure' type='quantitative'><calculation class='tableau' formula="SUM(IIF([value_tier] = 'High', 1, 0))" /></column><column caption="KPI High-Value Revenue %" datatype='real' name='[Calculation_kpi_high_value_rev_pct]' role='measure' type='quantitative'><calculation class='tableau' formula="ROUND(100 * SUM(IIF([value_tier] = 'High', [total_revenue], 0)) / SUM([total_revenue]), 1)" /></column><column caption="Customers" datatype='integer' name='[Calculation_customer_count]' role='measure' type='quantitative'><calculation class='tableau' formula="COUNTD([customer_unique_id])" /></column><column caption="Lifecycle Stage" datatype='string' name='[Calculation_lifecycle_stage]' role='dimension' type='nominal'><calculation class='tableau' formula="IF [customer_group] = 'Loyal Customer' THEN 'Loyal' ELSEIF [customer_group] = 'New Customer' THEN 'New' ELSEIF [risk_tier] = 'High' THEN 'At-risk' ELSE 'Other one-time' END" /></column><column caption="Revenue Band" datatype='string' name='[Calculation_revenue_band]' role='dimension' type='nominal'><calculation class='tableau' formula="IF [total_revenue] &lt; 50 THEN '1: &lt; R$50' ELSEIF [total_revenue] &lt; 100 THEN '2: R$50-99' ELSEIF [total_revenue] &lt; 200 THEN '3: R$100-199' ELSEIF [total_revenue] &lt; 500 THEN '4: R$200-499' ELSEIF [total_revenue] &lt; 1000 THEN '5: R$500-999' ELSE '6: R$1,000+' END" /></column><column caption="Revenue (R$ M)" datatype='real' name='[Calculation_revenue_m]' role='measure' type='quantitative'><calculation class='tableau' formula="SUM([total_revenue]) / 1000000" /></column><column caption="Avg Return Probability %" datatype='real' name='[Calculation_avg_return_pct]' role='measure' type='quantitative'><calculation class='tableau' formula="ROUND(100 * AVG([return_probability]), 2)" /></column><column caption="Within Budget" datatype='boolean' name='[Calculation_within_budget]' role='dimension' type='nominal'><calculation class='tableau' formula="[cumulative_action_cost_brl] &lt;= [Parameters].[Parameter 1]" /></column><column caption="KPI Customers In Budget" datatype='integer' name='[Calculation_kpi_budget_customers]' role='measure' type='quantitative'><calculation class='tableau' formula="SUM(IIF([cumulative_action_cost_brl] &lt;= [Parameters].[Parameter 1], 1, 0))" /></column><column caption="KPI Budget Spend" datatype='real' name='[Calculation_kpi_budget_spend]' role='measure' type='quantitative'><calculation class='tableau' formula="ROUND(SUM(IIF([cumulative_action_cost_brl] &lt;= [Parameters].[Parameter 1], [action_cost_brl], 0)), 0)" /></column><column caption="KPI High-Value In Budget" datatype='integer' name='[Calculation_kpi_budget_high_value]' role='measure' type='quantitative'><calculation class='tableau' formula="SUM(IIF([cumulative_action_cost_brl] &lt;= [Parameters].[Parameter 1] AND [value_tier] = 'High', 1, 0))" /></column><column caption="KPI Revenue Share In Budget %" datatype='real' name='[Calculation_kpi_budget_rev_pct]' role='measure' type='quantitative'><calculation class='tableau' formula="ROUND(100 * SUM(IIF([cumulative_action_cost_brl] &lt;= [Parameters].[Parameter 1], [total_revenue], 0)) / SUM([total_revenue]), 1)" /></column><column caption="Return Probability %" datatype='real' name='[Calculation_return_prob_pct]' role='dimension' type='ordinal'><calculation class='tableau' formula="ROUND(100 * [return_probability], 2)" /></column><column caption="Customer" datatype='string' name='[Calculation_customer_short_id]' role='dimension' type='nominal'><calculation class='tableau' formula="LEFT([customer_unique_id], 8)" /></column>
+      <layout dim-ordering='alphabetic' measure-ordering='alphabetic' show-structure='true' />
+      <style><style-rule element='mark'><encoding attr='color' field='[none:value_tier:nk]' type='palette'><map to='#104281'><bucket>&quot;High&quot;</bucket></map><map to='#2a78d6'><bucket>&quot;Medium&quot;</bucket></map><map to='#86b6ef'><bucket>&quot;Low&quot;</bucket></map></encoding><encoding attr='color' field='[none:risk_tier:nk]' type='palette'><map to='#eb6834'><bucket>&quot;High&quot;</bucket></map><map to='#a8a79f'><bucket>&quot;Medium&quot;</bucket></map><map to='#d6d5cf'><bucket>&quot;Low&quot;</bucket></map></encoding><encoding attr='color' field='[none:activity_status:nk]' type='palette'><map to='#2a78d6'><bucket>&quot;Active&quot;</bucket></map><map to='#eb6834'><bucket>&quot;Cooling&quot;</bucket></map><map to='#a8a79f'><bucket>&quot;Inactive&quot;</bucket></map></encoding><encoding attr='color' field='[none:Calculation_within_budget:nk]' type='palette'><map to='#eb6834'><bucket>true</bucket></map><map to='#d6d5cf'><bucket>false</bucket></map></encoding></style-rule></style>
+    </datasource>
+    <datasource caption='monthly_revenue' inline='true' name='federated.monthlyrevenue' version='18.1'>
+      <connection class='federated'>
+        <named-connections>
+          <named-connection caption='monthly_revenue' name='textscan.monthlyrevenue'>
+            <connection class='textscan' directory="/Users/rishikamethi/Documents/customer-retention-intelligence-platform/tableau/data" filename='monthly_revenue.csv' password='' server='' />
+          </named-connection>
+        </named-connections>
+        <relation connection='textscan.monthlyrevenue' name='monthly_revenue.csv' table='[monthly_revenue#csv]' type='table'>
+          <columns character-set='UTF-8' header='yes' locale='en_US' separator=','><column datatype='date' name='purchase_month' ordinal='0' /><column datatype='integer' name='orders' ordinal='1' /><column datatype='integer' name='unique_customers' ordinal='2' /><column datatype='real' name='revenue' ordinal='3' /><column datatype='real' name='avg_order_value' ordinal='4' /><column datatype='real' name='items_per_order' ordinal='5' /><column datatype='integer' name='new_customers' ordinal='6' /><column datatype='integer' name='returning_customers' ordinal='7' /><column datatype='real' name='new_customer_revenue' ordinal='8' /><column datatype='real' name='returning_customer_revenue' ordinal='9' /><column datatype='real' name='returning_customer_share' ordinal='10' /><column datatype='real' name='cumulative_revenue' ordinal='11' /><column datatype='boolean' name='is_low_volume_month' ordinal='12' /></columns>
+        </relation>
+      </connection>
+      <aliases enabled='yes' />
+      <column caption="Returning Share %" datatype='real' name='[Calculation_returning_share_pct]' role='measure' type='quantitative'><calculation class='tableau' formula="SUM([returning_customer_share]) * 100" /></column><column caption="Revenue (R$ K)" datatype='real' name='[Calculation_revenue_k]' role='measure' type='quantitative'><calculation class='tableau' formula="SUM([revenue]) / 1000" /></column>
+      <layout dim-ordering='alphabetic' measure-ordering='alphabetic' show-structure='true' />
+      
+    </datasource>
+    <datasource caption='cohort_retention' inline='true' name='federated.cohortretention' version='18.1'>
+      <connection class='federated'>
+        <named-connections>
+          <named-connection caption='cohort_retention' name='textscan.cohortretention'>
+            <connection class='textscan' directory="/Users/rishikamethi/Documents/customer-retention-intelligence-platform/tableau/data" filename='cohort_retention.csv' password='' server='' />
+          </named-connection>
+        </named-connections>
+        <relation connection='textscan.cohortretention' name='cohort_retention.csv' table='[cohort_retention#csv]' type='table'>
+          <columns character-set='UTF-8' header='yes' locale='en_US' separator=','><column datatype='string' name='cohort_key' ordinal='0' /><column datatype='date' name='acquisition_month' ordinal='1' /><column datatype='integer' name='months_since_acquisition' ordinal='2' /><column datatype='integer' name='cohort_customers' ordinal='3' /><column datatype='integer' name='active_customers' ordinal='4' /><column datatype='real' name='retention_rate' ordinal='5' /><column datatype='boolean' name='is_small_cohort' ordinal='6' /></columns>
+        </relation>
+      </connection>
+      <aliases enabled='yes' />
+      <column caption="Retention %" datatype='real' name='[Calculation_retention_pct]' role='measure' type='quantitative'><calculation class='tableau' formula="ROUND(100 * SUM([retention_rate]), 2)" /></column>
+      <layout dim-ordering='alphabetic' measure-ordering='alphabetic' show-structure='true' />
+      
+    </datasource>
+    <datasource caption='category_performance' inline='true' name='federated.categoryperformance' version='18.1'>
+      <connection class='federated'>
+        <named-connections>
+          <named-connection caption='category_performance' name='textscan.categoryperformance'>
+            <connection class='textscan' directory="/Users/rishikamethi/Documents/customer-retention-intelligence-platform/tableau/data" filename='category_performance.csv' password='' server='' />
+          </named-connection>
+        </named-connections>
+        <relation connection='textscan.categoryperformance' name='category_performance.csv' table='[category_performance#csv]' type='table'>
+          <columns character-set='UTF-8' header='yes' locale='en_US' separator=','><column datatype='string' name='product_category' ordinal='0' /><column datatype='integer' name='items_sold' ordinal='1' /><column datatype='integer' name='orders' ordinal='2' /><column datatype='integer' name='unique_customers' ordinal='3' /><column datatype='integer' name='products_sold' ordinal='4' /><column datatype='real' name='item_revenue' ordinal='5' /><column datatype='real' name='freight_revenue' ordinal='6' /><column datatype='real' name='avg_item_price' ordinal='7' /><column datatype='real' name='item_revenue_share' ordinal='8' /><column datatype='integer' name='revenue_rank' ordinal='9' /><column datatype='real' name='avg_review_score' ordinal='10' /></columns>
+        </relation>
+      </connection>
+      <aliases enabled='yes' />
+      <column caption="Item Revenue (R$ K)" datatype='real' name='[Calculation_item_revenue_k]' role='measure' type='quantitative'><calculation class='tableau' formula="SUM([item_revenue]) / 1000" /></column>
+      <layout dim-ordering='alphabetic' measure-ordering='alphabetic' show-structure='true' />
+      
+    </datasource>
+    <datasource caption='model_lift_by_decile' inline='true' name='federated.modelliftbydecile' version='18.1'>
+      <connection class='federated'>
+        <named-connections>
+          <named-connection caption='model_lift_by_decile' name='textscan.modelliftbydecile'>
+            <connection class='textscan' directory="/Users/rishikamethi/Documents/customer-retention-intelligence-platform/tableau/data" filename='model_lift_by_decile.csv' password='' server='' />
+          </named-connection>
+        </named-connections>
+        <relation connection='textscan.modelliftbydecile' name='model_lift_by_decile.csv' table='[model_lift_by_decile#csv]' type='table'>
+          <columns character-set='UTF-8' header='yes' locale='en_US' separator=','><column datatype='integer' name='decile' ordinal='0' /><column datatype='integer' name='customers' ordinal='1' /><column datatype='integer' name='returned' ordinal='2' /><column datatype='real' name='predicted_rate' ordinal='3' /><column datatype='real' name='actual_rate' ordinal='4' /><column datatype='real' name='lift' ordinal='5' /><column datatype='real' name='cumulative_capture' ordinal='6' /></columns>
+        </relation>
+      </connection>
+      <aliases enabled='yes' />
+      
+      <layout dim-ordering='alphabetic' measure-ordering='alphabetic' show-structure='true' />
+      
+    </datasource>
+  </datasources>
+  <worksheets>
+    <worksheet name="1.1a KPI Revenue">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /></datasources>
+          
+          <datasource-dependencies datasource='federated.customers'><column caption="KPI Revenue (M)" datatype='real' name='[Calculation_kpi_revenue_m]' role='measure' type='quantitative'><calculation class='tableau' formula="ROUND(SUM([total_revenue]) / 1000000, 2)" /></column><column caption="Total Revenue" datatype='real' name='[total_revenue]' role='measure' type='quantitative' /><column-instance column='[Calculation_kpi_revenue_m]' derivation='User' name='[usr:Calculation_kpi_revenue_m:qk]' pivot='key' type='quantitative' /></datasource-dependencies>
+          
+          
+          
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Text' />
+            <customized-label><formatted-text><run fontcolor='#52514e' fontsize='11'>Revenue</run><run>Æ&#10;</run><run fontcolor='#0b0b0b' fontsize='26'>R$ </run><run bold='true' fontcolor='#0b0b0b' fontsize='26'>&lt;[federated.customers].[usr:Calculation_kpi_revenue_m:qk]&gt;</run><run fontcolor='#0b0b0b' fontsize='26'>M</run></formatted-text></customized-label>
+            <encodings><text column='[federated.customers].[usr:Calculation_kpi_revenue_m:qk]' /></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#2a78d6' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows></rows>
+        <cols></cols>
+      </table>
+    </worksheet>
+    <worksheet name="1.1b KPI Orders">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /></datasources>
+          
+          <datasource-dependencies datasource='federated.customers'><column caption="KPI Orders" datatype='integer' name='[Calculation_kpi_orders]' role='measure' type='quantitative'><calculation class='tableau' formula="SUM([order_count])" /></column><column caption="Order Count" datatype='integer' name='[order_count]' role='measure' type='quantitative' /><column-instance column='[Calculation_kpi_orders]' derivation='User' name='[usr:Calculation_kpi_orders:qk]' pivot='key' type='quantitative' /></datasource-dependencies>
+          
+          
+          
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Text' />
+            <customized-label><formatted-text><run fontcolor='#52514e' fontsize='11'>Orders</run><run>Æ&#10;</run><run fontcolor='#0b0b0b' fontsize='26'></run><run bold='true' fontcolor='#0b0b0b' fontsize='26'>&lt;[federated.customers].[usr:Calculation_kpi_orders:qk]&gt;</run><run fontcolor='#0b0b0b' fontsize='26'></run></formatted-text></customized-label>
+            <encodings><text column='[federated.customers].[usr:Calculation_kpi_orders:qk]' /></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#2a78d6' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows></rows>
+        <cols></cols>
+      </table>
+    </worksheet>
+    <worksheet name="1.1c KPI Customers">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /></datasources>
+          
+          <datasource-dependencies datasource='federated.customers'><column caption="KPI Customers" datatype='integer' name='[Calculation_kpi_customers]' role='measure' type='quantitative'><calculation class='tableau' formula="COUNTD([customer_unique_id])" /></column><column caption="Customer Unique Id" datatype='string' name='[customer_unique_id]' role='dimension' type='nominal' /><column-instance column='[Calculation_kpi_customers]' derivation='User' name='[usr:Calculation_kpi_customers:qk]' pivot='key' type='quantitative' /></datasource-dependencies>
+          
+          
+          
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Text' />
+            <customized-label><formatted-text><run fontcolor='#52514e' fontsize='11'>Customers</run><run>Æ&#10;</run><run fontcolor='#0b0b0b' fontsize='26'></run><run bold='true' fontcolor='#0b0b0b' fontsize='26'>&lt;[federated.customers].[usr:Calculation_kpi_customers:qk]&gt;</run><run fontcolor='#0b0b0b' fontsize='26'></run></formatted-text></customized-label>
+            <encodings><text column='[federated.customers].[usr:Calculation_kpi_customers:qk]' /></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#2a78d6' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows></rows>
+        <cols></cols>
+      </table>
+    </worksheet>
+    <worksheet name="1.1d KPI AOV">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /></datasources>
+          
+          <datasource-dependencies datasource='federated.customers'><column caption="KPI AOV" datatype='real' name='[Calculation_kpi_aov]' role='measure' type='quantitative'><calculation class='tableau' formula="ROUND(SUM([total_revenue]) / SUM([order_count]), 2)" /></column><column caption="Order Count" datatype='integer' name='[order_count]' role='measure' type='quantitative' /><column caption="Total Revenue" datatype='real' name='[total_revenue]' role='measure' type='quantitative' /><column-instance column='[Calculation_kpi_aov]' derivation='User' name='[usr:Calculation_kpi_aov:qk]' pivot='key' type='quantitative' /></datasource-dependencies>
+          
+          
+          
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Text' />
+            <customized-label><formatted-text><run fontcolor='#52514e' fontsize='11'>Average order value</run><run>Æ&#10;</run><run fontcolor='#0b0b0b' fontsize='26'>R$ </run><run bold='true' fontcolor='#0b0b0b' fontsize='26'>&lt;[federated.customers].[usr:Calculation_kpi_aov:qk]&gt;</run><run fontcolor='#0b0b0b' fontsize='26'></run></formatted-text></customized-label>
+            <encodings><text column='[federated.customers].[usr:Calculation_kpi_aov:qk]' /></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#2a78d6' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows></rows>
+        <cols></cols>
+      </table>
+    </worksheet>
+    <worksheet name="1.1e KPI Repeat">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /></datasources>
+          
+          <datasource-dependencies datasource='federated.customers'><column caption="KPI Repeat Rate %" datatype='real' name='[Calculation_kpi_repeat_pct]' role='measure' type='quantitative'><calculation class='tableau' formula="ROUND(100 * SUM(IIF([order_count] &gt;= 2, 1, 0)) / COUNT([customer_unique_id]), 2)" /></column><column caption="Customer Unique Id" datatype='string' name='[customer_unique_id]' role='dimension' type='nominal' /><column caption="Order Count" datatype='integer' name='[order_count]' role='measure' type='quantitative' /><column-instance column='[Calculation_kpi_repeat_pct]' derivation='User' name='[usr:Calculation_kpi_repeat_pct:qk]' pivot='key' type='quantitative' /></datasource-dependencies>
+          
+          
+          
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Text' />
+            <customized-label><formatted-text><run fontcolor='#52514e' fontsize='11'>Repeat purchase rate</run><run>Æ&#10;</run><run fontcolor='#0b0b0b' fontsize='26'></run><run bold='true' fontcolor='#0b0b0b' fontsize='26'>&lt;[federated.customers].[usr:Calculation_kpi_repeat_pct:qk]&gt;</run><run fontcolor='#0b0b0b' fontsize='26'>%</run></formatted-text></customized-label>
+            <encodings><text column='[federated.customers].[usr:Calculation_kpi_repeat_pct:qk]' /></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#2a78d6' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows></rows>
+        <cols></cols>
+      </table>
+    </worksheet>
+    <worksheet name="1.1f KPI High Value">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /></datasources>
+          
+          <datasource-dependencies datasource='federated.customers'><column caption="KPI High-Value Customers" datatype='integer' name='[Calculation_kpi_high_value]' role='measure' type='quantitative'><calculation class='tableau' formula="SUM(IIF([value_tier] = 'High', 1, 0))" /></column><column caption="KPI High-Value Revenue %" datatype='real' name='[Calculation_kpi_high_value_rev_pct]' role='measure' type='quantitative'><calculation class='tableau' formula="ROUND(100 * SUM(IIF([value_tier] = 'High', [total_revenue], 0)) / SUM([total_revenue]), 1)" /></column><column caption="Value Tier" datatype='string' name='[value_tier]' role='dimension' type='nominal' /><column caption="Total Revenue" datatype='real' name='[total_revenue]' role='measure' type='quantitative' /><column-instance column='[Calculation_kpi_high_value]' derivation='User' name='[usr:Calculation_kpi_high_value:qk]' pivot='key' type='quantitative' /><column-instance column='[Calculation_kpi_high_value_rev_pct]' derivation='User' name='[usr:Calculation_kpi_high_value_rev_pct:qk]' pivot='key' type='quantitative' /></datasource-dependencies>
+          
+          
+          
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Text' />
+            <customized-label><formatted-text><run fontcolor='#52514e' fontsize='11'>High-value customers</run><run>Æ&#10;</run><run fontcolor='#0b0b0b' fontsize='26'></run><run bold='true' fontcolor='#0b0b0b' fontsize='26'>&lt;[federated.customers].[usr:Calculation_kpi_high_value:qk]&gt;</run><run fontcolor='#0b0b0b' fontsize='26'></run><run>Æ&#10;</run><run fontcolor='#52514e' fontsize='10'></run><run bold='true' fontcolor='#0b0b0b' fontsize='26'>&lt;[federated.customers].[usr:Calculation_kpi_high_value_rev_pct:qk]&gt;</run><run fontcolor='#52514e' fontsize='10'>% of revenue</run></formatted-text></customized-label>
+            <encodings><text column='[federated.customers].[usr:Calculation_kpi_high_value:qk]' /><text column='[federated.customers].[usr:Calculation_kpi_high_value_rev_pct:qk]' /></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#2a78d6' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows></rows>
+        <cols></cols>
+      </table>
+    </worksheet>
+    <worksheet name="1.2 Monthly revenue">
+      <table>
+        <view>
+          <datasources><datasource caption='monthly_revenue' name='federated.monthlyrevenue' /></datasources>
+          
+          <datasource-dependencies datasource='federated.monthlyrevenue'><column caption="Revenue (R$ K)" datatype='real' name='[Calculation_revenue_k]' role='measure' type='quantitative'><calculation class='tableau' formula="SUM([revenue]) / 1000" /></column><column caption="Purchase Month" datatype='date' name='[purchase_month]' role='dimension' type='ordinal' /><column caption="Is Low Volume Month" datatype='boolean' name='[is_low_volume_month]' role='dimension' type='nominal' /><column caption="Revenue" datatype='real' name='[revenue]' role='measure' type='quantitative' /><column-instance column='[Calculation_revenue_k]' derivation='User' name='[usr:Calculation_revenue_k:qk]' pivot='key' type='quantitative' /><column-instance column='[purchase_month]' derivation='Month-Trunc' name='[tmn:purchase_month:qk]' pivot='key' type='quantitative' /><column-instance column='[is_low_volume_month]' derivation='None' name='[none:is_low_volume_month:nk]' pivot='key' type='nominal' /></datasource-dependencies>
+          <filter class='categorical' column='[federated.monthlyrevenue].[none:is_low_volume_month:nk]'><groupfilter function='member' level='[none:is_low_volume_month:nk]' member='false' user:ui-domain='database' user:ui-enumeration='inclusive' user:ui-marker='enumerate' /></filter>
+          
+          <slices><column>[federated.monthlyrevenue].[none:is_low_volume_month:nk]</column></slices>
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Line' />
+            
+            <encodings></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#2a78d6' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows>[federated.monthlyrevenue].[usr:Calculation_revenue_k:qk]</rows>
+        <cols>[federated.monthlyrevenue].[tmn:purchase_month:qk]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="1.3 New customers per month">
+      <table>
+        <view>
+          <datasources><datasource caption='monthly_revenue' name='federated.monthlyrevenue' /></datasources>
+          
+          <datasource-dependencies datasource='federated.monthlyrevenue'><column caption="New Customers" datatype='integer' name='[new_customers]' role='measure' type='quantitative' /><column caption="Purchase Month" datatype='date' name='[purchase_month]' role='dimension' type='ordinal' /><column caption="Is Low Volume Month" datatype='boolean' name='[is_low_volume_month]' role='dimension' type='nominal' /><column-instance column='[new_customers]' derivation='Sum' name='[sum:new_customers:qk]' pivot='key' type='quantitative' /><column-instance column='[purchase_month]' derivation='Month-Trunc' name='[tmn:purchase_month:ok]' pivot='key' type='ordinal' /><column-instance column='[is_low_volume_month]' derivation='None' name='[none:is_low_volume_month:nk]' pivot='key' type='nominal' /></datasource-dependencies>
+          <filter class='categorical' column='[federated.monthlyrevenue].[none:is_low_volume_month:nk]'><groupfilter function='member' level='[none:is_low_volume_month:nk]' member='false' user:ui-domain='database' user:ui-enumeration='inclusive' user:ui-marker='enumerate' /></filter>
+          
+          <slices><column>[federated.monthlyrevenue].[none:is_low_volume_month:nk]</column></slices>
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Bar' />
+            
+            <encodings></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#2a78d6' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows>[federated.monthlyrevenue].[sum:new_customers:qk]</rows>
+        <cols>[federated.monthlyrevenue].[tmn:purchase_month:ok]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="1.4 Returning customer share">
+      <table>
+        <view>
+          <datasources><datasource caption='monthly_revenue' name='federated.monthlyrevenue' /></datasources>
+          
+          <datasource-dependencies datasource='federated.monthlyrevenue'><column caption="Returning Share %" datatype='real' name='[Calculation_returning_share_pct]' role='measure' type='quantitative'><calculation class='tableau' formula="SUM([returning_customer_share]) * 100" /></column><column caption="Purchase Month" datatype='date' name='[purchase_month]' role='dimension' type='ordinal' /><column caption="Is Low Volume Month" datatype='boolean' name='[is_low_volume_month]' role='dimension' type='nominal' /><column caption="Returning Customer Share" datatype='real' name='[returning_customer_share]' role='measure' type='quantitative' /><column-instance column='[Calculation_returning_share_pct]' derivation='User' name='[usr:Calculation_returning_share_pct:qk]' pivot='key' type='quantitative' /><column-instance column='[purchase_month]' derivation='Month-Trunc' name='[tmn:purchase_month:qk]' pivot='key' type='quantitative' /><column-instance column='[is_low_volume_month]' derivation='None' name='[none:is_low_volume_month:nk]' pivot='key' type='nominal' /></datasource-dependencies>
+          <filter class='categorical' column='[federated.monthlyrevenue].[none:is_low_volume_month:nk]'><groupfilter function='member' level='[none:is_low_volume_month:nk]' member='false' user:ui-domain='database' user:ui-enumeration='inclusive' user:ui-marker='enumerate' /></filter>
+          
+          <slices><column>[federated.monthlyrevenue].[none:is_low_volume_month:nk]</column></slices>
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Line' />
+            
+            <encodings></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#1baf7a' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows>[federated.monthlyrevenue].[usr:Calculation_returning_share_pct:qk]</rows>
+        <cols>[federated.monthlyrevenue].[tmn:purchase_month:qk]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="2.1 RFM segments">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /></datasources>
+          
+          <datasource-dependencies datasource='federated.customers'><column caption="Rfm Segment" datatype='string' name='[rfm_segment]' role='dimension' type='nominal' /><column caption="Revenue (R$ M)" datatype='real' name='[Calculation_revenue_m]' role='measure' type='quantitative'><calculation class='tableau' formula="SUM([total_revenue]) / 1000000" /></column><column caption="Customers" datatype='integer' name='[Calculation_customer_count]' role='measure' type='quantitative'><calculation class='tableau' formula="COUNTD([customer_unique_id])" /></column><column caption="Customer State" datatype='string' name='[customer_state]' role='dimension' type='nominal' /><column caption="Total Revenue" datatype='real' name='[total_revenue]' role='measure' type='quantitative' /><column caption="Customer Unique Id" datatype='string' name='[customer_unique_id]' role='dimension' type='nominal' /><column-instance column='[rfm_segment]' derivation='None' name='[none:rfm_segment:nk]' pivot='key' type='nominal' /><column-instance column='[Calculation_revenue_m]' derivation='User' name='[usr:Calculation_revenue_m:qk]' pivot='key' type='quantitative' /><column-instance column='[Calculation_customer_count]' derivation='User' name='[usr:Calculation_customer_count:qk]' pivot='key' type='quantitative' /><column-instance column='[customer_state]' derivation='None' name='[none:customer_state:nk]' pivot='key' type='nominal' /></datasource-dependencies>
+          <filter class='categorical' column='[federated.customers].[none:customer_state:nk]'><groupfilter function='level-members' level='[none:customer_state:nk]' user:ui-enumeration='all' user:ui-marker='enumerate' /></filter>
+          <computed-sort column='[federated.customers].[none:rfm_segment:nk]' direction='DESC' using='[federated.customers].[usr:Calculation_revenue_m:qk]' />
+          <slices><column>[federated.customers].[none:customer_state:nk]</column></slices>
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Bar' />
+            
+            <encodings><text column='[federated.customers].[usr:Calculation_customer_count:qk]' /></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#2a78d6' /><format attr='mark-labels-show' value='true' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows>[federated.customers].[none:rfm_segment:nk]</rows>
+        <cols>[federated.customers].[usr:Calculation_revenue_m:qk]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="2.2 Recency x Monetary">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /></datasources>
+          
+          <datasource-dependencies datasource='federated.customers'><column caption="M Score" datatype='integer' name='[m_score]' role='measure' type='quantitative' /><column caption="R Score" datatype='integer' name='[r_score]' role='measure' type='quantitative' /><column caption="Customers" datatype='integer' name='[Calculation_customer_count]' role='measure' type='quantitative'><calculation class='tableau' formula="COUNTD([customer_unique_id])" /></column><column caption="Customer Unique Id" datatype='string' name='[customer_unique_id]' role='dimension' type='nominal' /><column-instance column='[m_score]' derivation='None' name='[none:m_score:ok]' pivot='key' type='ordinal' /><column-instance column='[r_score]' derivation='None' name='[none:r_score:ok]' pivot='key' type='ordinal' /><column-instance column='[Calculation_customer_count]' derivation='User' name='[usr:Calculation_customer_count:qk]' pivot='key' type='quantitative' /></datasource-dependencies>
+          
+          
+          
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Square' />
+            
+            <encodings><color column='[federated.customers].[usr:Calculation_customer_count:qk]' /><text column='[federated.customers].[usr:Calculation_customer_count:qk]' /></encodings>
+            <style />
+          </pane>
+        </panes>
+        <rows>[federated.customers].[none:m_score:ok]</rows>
+        <cols>[federated.customers].[none:r_score:ok]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="2.3 Value distribution">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /></datasources>
+          
+          <datasource-dependencies datasource='federated.customers'><column caption="Customers" datatype='integer' name='[Calculation_customer_count]' role='measure' type='quantitative'><calculation class='tableau' formula="COUNTD([customer_unique_id])" /></column><column caption="Revenue Band" datatype='string' name='[Calculation_revenue_band]' role='dimension' type='nominal'><calculation class='tableau' formula="IF [total_revenue] &lt; 50 THEN '1: &lt; R$50' ELSEIF [total_revenue] &lt; 100 THEN '2: R$50-99' ELSEIF [total_revenue] &lt; 200 THEN '3: R$100-199' ELSEIF [total_revenue] &lt; 500 THEN '4: R$200-499' ELSEIF [total_revenue] &lt; 1000 THEN '5: R$500-999' ELSE '6: R$1,000+' END" /></column><column caption="Customer Unique Id" datatype='string' name='[customer_unique_id]' role='dimension' type='nominal' /><column caption="Total Revenue" datatype='real' name='[total_revenue]' role='measure' type='quantitative' /><column-instance column='[Calculation_customer_count]' derivation='User' name='[usr:Calculation_customer_count:qk]' pivot='key' type='quantitative' /><column-instance column='[Calculation_revenue_band]' derivation='None' name='[none:Calculation_revenue_band:nk]' pivot='key' type='nominal' /></datasource-dependencies>
+          
+          
+          
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Bar' />
+            
+            <encodings><text column='[federated.customers].[usr:Calculation_customer_count:qk]' /></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#2a78d6' /><format attr='mark-labels-show' value='true' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows>[federated.customers].[usr:Calculation_customer_count:qk]</rows>
+        <cols>[federated.customers].[none:Calculation_revenue_band:nk]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="2.4 Lifecycle stage">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /></datasources>
+          
+          <datasource-dependencies datasource='federated.customers'><column caption="Lifecycle Stage" datatype='string' name='[Calculation_lifecycle_stage]' role='dimension' type='nominal'><calculation class='tableau' formula="IF [customer_group] = 'Loyal Customer' THEN 'Loyal' ELSEIF [customer_group] = 'New Customer' THEN 'New' ELSEIF [risk_tier] = 'High' THEN 'At-risk' ELSE 'Other one-time' END" /></column><column caption="Customers" datatype='integer' name='[Calculation_customer_count]' role='measure' type='quantitative'><calculation class='tableau' formula="COUNTD([customer_unique_id])" /></column><column caption="Risk Tier" datatype='string' name='[risk_tier]' role='dimension' type='nominal' /><column caption="Customer Group" datatype='string' name='[customer_group]' role='dimension' type='nominal' /><column caption="Customer Unique Id" datatype='string' name='[customer_unique_id]' role='dimension' type='nominal' /><column-instance column='[Calculation_lifecycle_stage]' derivation='None' name='[none:Calculation_lifecycle_stage:nk]' pivot='key' type='nominal' /><column-instance column='[Calculation_customer_count]' derivation='User' name='[usr:Calculation_customer_count:qk]' pivot='key' type='quantitative' /></datasource-dependencies>
+          
+          <manual-sort column='[federated.customers].[none:Calculation_lifecycle_stage:nk]' direction='ASC'><dictionary><bucket>&quot;Loyal&quot;</bucket><bucket>&quot;New&quot;</bucket><bucket>&quot;At-risk&quot;</bucket><bucket>&quot;Other one-time&quot;</bucket></dictionary></manual-sort>
+          
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Bar' />
+            
+            <encodings><text column='[federated.customers].[usr:Calculation_customer_count:qk]' /></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#2a78d6' /><format attr='mark-labels-show' value='true' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows>[federated.customers].[none:Calculation_lifecycle_stage:nk]</rows>
+        <cols>[federated.customers].[usr:Calculation_customer_count:qk]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="3.1 Risk distribution">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /></datasources>
+          
+          <datasource-dependencies datasource='federated.customers'><column caption="Customers" datatype='integer' name='[Calculation_customer_count]' role='measure' type='quantitative'><calculation class='tableau' formula="COUNTD([customer_unique_id])" /></column><column caption="Risk Tier" datatype='string' name='[risk_tier]' role='dimension' type='nominal' /><column caption="Avg Return Probability %" datatype='real' name='[Calculation_avg_return_pct]' role='measure' type='quantitative'><calculation class='tableau' formula="ROUND(100 * AVG([return_probability]), 2)" /></column><column caption="Customer Unique Id" datatype='string' name='[customer_unique_id]' role='dimension' type='nominal' /><column caption="Return Probability" datatype='real' name='[return_probability]' role='measure' type='quantitative' /><column-instance column='[Calculation_customer_count]' derivation='User' name='[usr:Calculation_customer_count:qk]' pivot='key' type='quantitative' /><column-instance column='[risk_tier]' derivation='None' name='[none:risk_tier:nk]' pivot='key' type='nominal' /><column-instance column='[Calculation_avg_return_pct]' derivation='User' name='[usr:Calculation_avg_return_pct:qk]' pivot='key' type='quantitative' /></datasource-dependencies>
+          
+          <manual-sort column='[federated.customers].[none:risk_tier:nk]' direction='ASC'><dictionary><bucket>&quot;High&quot;</bucket><bucket>&quot;Medium&quot;</bucket><bucket>&quot;Low&quot;</bucket></dictionary></manual-sort>
+          
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Bar' />
+            
+            <encodings><color column='[federated.customers].[none:risk_tier:nk]' /><text column='[federated.customers].[usr:Calculation_customer_count:qk]' /><tooltip column='[federated.customers].[usr:Calculation_avg_return_pct:qk]' /></encodings>
+            <style><style-rule element='mark'><format attr='mark-labels-show' value='true' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows>[federated.customers].[usr:Calculation_customer_count:qk]</rows>
+        <cols>[federated.customers].[none:risk_tier:nk]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="3.2 Value x risk">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /></datasources>
+          
+          <datasource-dependencies datasource='federated.customers'><column caption="Value Tier" datatype='string' name='[value_tier]' role='dimension' type='nominal' /><column caption="Risk Tier" datatype='string' name='[risk_tier]' role='dimension' type='nominal' /><column caption="Customers" datatype='integer' name='[Calculation_customer_count]' role='measure' type='quantitative'><calculation class='tableau' formula="COUNTD([customer_unique_id])" /></column><column caption="Revenue (R$ M)" datatype='real' name='[Calculation_revenue_m]' role='measure' type='quantitative'><calculation class='tableau' formula="SUM([total_revenue]) / 1000000" /></column><column caption="Customer Unique Id" datatype='string' name='[customer_unique_id]' role='dimension' type='nominal' /><column caption="Total Revenue" datatype='real' name='[total_revenue]' role='measure' type='quantitative' /><column-instance column='[value_tier]' derivation='None' name='[none:value_tier:nk]' pivot='key' type='nominal' /><column-instance column='[risk_tier]' derivation='None' name='[none:risk_tier:nk]' pivot='key' type='nominal' /><column-instance column='[Calculation_customer_count]' derivation='User' name='[usr:Calculation_customer_count:qk]' pivot='key' type='quantitative' /><column-instance column='[Calculation_revenue_m]' derivation='User' name='[usr:Calculation_revenue_m:qk]' pivot='key' type='quantitative' /></datasource-dependencies>
+          
+          <manual-sort column='[federated.customers].[none:value_tier:nk]' direction='ASC'><dictionary><bucket>&quot;High&quot;</bucket><bucket>&quot;Medium&quot;</bucket><bucket>&quot;Low&quot;</bucket></dictionary></manual-sort><manual-sort column='[federated.customers].[none:risk_tier:nk]' direction='ASC'><dictionary><bucket>&quot;High&quot;</bucket><bucket>&quot;Medium&quot;</bucket><bucket>&quot;Low&quot;</bucket></dictionary></manual-sort>
+          
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Square' />
+            
+            <encodings><color column='[federated.customers].[usr:Calculation_revenue_m:qk]' /><text column='[federated.customers].[usr:Calculation_customer_count:qk]' /><text column='[federated.customers].[usr:Calculation_revenue_m:qk]' /></encodings>
+            <style />
+          </pane>
+        </panes>
+        <rows>[federated.customers].[none:value_tier:nk]</rows>
+        <cols>[federated.customers].[none:risk_tier:nk]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="3.3 Activity by value tier">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /></datasources>
+          
+          <datasource-dependencies datasource='federated.customers'><column caption="Value Tier" datatype='string' name='[value_tier]' role='dimension' type='nominal' /><column caption="Customers" datatype='integer' name='[Calculation_customer_count]' role='measure' type='quantitative'><calculation class='tableau' formula="COUNTD([customer_unique_id])" /></column><column caption="Activity Status" datatype='string' name='[activity_status]' role='dimension' type='nominal' /><column caption="Customer Unique Id" datatype='string' name='[customer_unique_id]' role='dimension' type='nominal' /><column-instance column='[value_tier]' derivation='None' name='[none:value_tier:nk]' pivot='key' type='nominal' /><column-instance column='[Calculation_customer_count]' derivation='User' name='[usr:Calculation_customer_count:qk]' pivot='key' type='quantitative' /><column-instance column='[activity_status]' derivation='None' name='[none:activity_status:nk]' pivot='key' type='nominal' /></datasource-dependencies>
+          
+          <manual-sort column='[federated.customers].[none:value_tier:nk]' direction='ASC'><dictionary><bucket>&quot;High&quot;</bucket><bucket>&quot;Medium&quot;</bucket><bucket>&quot;Low&quot;</bucket></dictionary></manual-sort><manual-sort column='[federated.customers].[none:activity_status:nk]' direction='ASC'><dictionary><bucket>&quot;Active&quot;</bucket><bucket>&quot;Cooling&quot;</bucket><bucket>&quot;Inactive&quot;</bucket></dictionary></manual-sort>
+          
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Bar' />
+            
+            <encodings><color column='[federated.customers].[none:activity_status:nk]' /></encodings>
+            <style />
+          </pane>
+        </panes>
+        <rows>[federated.customers].[none:value_tier:nk]</rows>
+        <cols>[federated.customers].[usr:Calculation_customer_count:qk]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="3.4 Cohort retention">
+      <table>
+        <view>
+          <datasources><datasource caption='cohort_retention' name='federated.cohortretention' /></datasources>
+          
+          <datasource-dependencies datasource='federated.cohortretention'><column caption="Acquisition Month" datatype='date' name='[acquisition_month]' role='dimension' type='ordinal' /><column caption="Months Since Acquisition" datatype='integer' name='[months_since_acquisition]' role='measure' type='quantitative' /><column caption="Retention %" datatype='real' name='[Calculation_retention_pct]' role='measure' type='quantitative'><calculation class='tableau' formula="ROUND(100 * SUM([retention_rate]), 2)" /></column><column caption="Is Small Cohort" datatype='boolean' name='[is_small_cohort]' role='dimension' type='nominal' /><column caption="Retention Rate" datatype='real' name='[retention_rate]' role='measure' type='quantitative' /><column-instance column='[acquisition_month]' derivation='Month-Trunc' name='[tmn:acquisition_month:ok]' pivot='key' type='ordinal' /><column-instance column='[months_since_acquisition]' derivation='None' name='[none:months_since_acquisition:ok]' pivot='key' type='ordinal' /><column-instance column='[Calculation_retention_pct]' derivation='User' name='[usr:Calculation_retention_pct:qk]' pivot='key' type='quantitative' /><column-instance column='[is_small_cohort]' derivation='None' name='[none:is_small_cohort:nk]' pivot='key' type='nominal' /><column-instance column='[months_since_acquisition]' derivation='None' name='[none:months_since_acquisition:qk]' pivot='key' type='quantitative' /></datasource-dependencies>
+          <filter class='categorical' column='[federated.cohortretention].[none:is_small_cohort:nk]'><groupfilter function='member' level='[none:is_small_cohort:nk]' member='false' user:ui-domain='database' user:ui-enumeration='inclusive' user:ui-marker='enumerate' /></filter><filter class='quantitative' column='[federated.cohortretention].[none:months_since_acquisition:qk]' included-values='in-range'><min>1</min><max>12</max></filter>
+          
+          <slices><column>[federated.cohortretention].[none:is_small_cohort:nk]</column><column>[federated.cohortretention].[none:months_since_acquisition:qk]</column></slices>
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Square' />
+            
+            <encodings><color column='[federated.cohortretention].[usr:Calculation_retention_pct:qk]' /><text column='[federated.cohortretention].[usr:Calculation_retention_pct:qk]' /></encodings>
+            <style />
+          </pane>
+        </panes>
+        <rows>[federated.cohortretention].[tmn:acquisition_month:ok]</rows>
+        <cols>[federated.cohortretention].[none:months_since_acquisition:ok]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="4.1 Opportunity map">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /></datasources>
+          
+          <datasource-dependencies datasource='federated.customers'><column caption="Avg Return Probability %" datatype='real' name='[Calculation_avg_return_pct]' role='measure' type='quantitative'><calculation class='tableau' formula="ROUND(100 * AVG([return_probability]), 2)" /></column><column caption="Revenue (R$ M)" datatype='real' name='[Calculation_revenue_m]' role='measure' type='quantitative'><calculation class='tableau' formula="SUM([total_revenue]) / 1000000" /></column><column caption="Customer Group" datatype='string' name='[customer_group]' role='dimension' type='nominal' /><column caption="Customers" datatype='integer' name='[Calculation_customer_count]' role='measure' type='quantitative'><calculation class='tableau' formula="COUNTD([customer_unique_id])" /></column><column caption="Return Probability" datatype='real' name='[return_probability]' role='measure' type='quantitative' /><column caption="Total Revenue" datatype='real' name='[total_revenue]' role='measure' type='quantitative' /><column caption="Customer Unique Id" datatype='string' name='[customer_unique_id]' role='dimension' type='nominal' /><column-instance column='[Calculation_avg_return_pct]' derivation='User' name='[usr:Calculation_avg_return_pct:qk]' pivot='key' type='quantitative' /><column-instance column='[Calculation_revenue_m]' derivation='User' name='[usr:Calculation_revenue_m:qk]' pivot='key' type='quantitative' /><column-instance column='[customer_group]' derivation='None' name='[none:customer_group:nk]' pivot='key' type='nominal' /><column-instance column='[Calculation_customer_count]' derivation='User' name='[usr:Calculation_customer_count:qk]' pivot='key' type='quantitative' /></datasource-dependencies>
+          
+          
+          
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Circle' />
+            
+            <encodings><size column='[federated.customers].[usr:Calculation_customer_count:qk]' /><text column='[federated.customers].[none:customer_group:nk]' /><lod column='[federated.customers].[none:customer_group:nk]' /></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#2a78d6' /><format attr='mark-labels-show' value='true' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows>[federated.customers].[usr:Calculation_avg_return_pct:qk]</rows>
+        <cols>[federated.customers].[usr:Calculation_revenue_m:qk]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="4.2 Next best actions">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /></datasources>
+          
+          <datasource-dependencies datasource='federated.customers'><column caption="Next Best Action" datatype='string' name='[next_best_action]' role='dimension' type='nominal' /><column caption="Customers" datatype='integer' name='[Calculation_customer_count]' role='measure' type='quantitative'><calculation class='tableau' formula="COUNTD([customer_unique_id])" /></column><column caption="Customer Unique Id" datatype='string' name='[customer_unique_id]' role='dimension' type='nominal' /><column-instance column='[next_best_action]' derivation='None' name='[none:next_best_action:nk]' pivot='key' type='nominal' /><column-instance column='[Calculation_customer_count]' derivation='User' name='[usr:Calculation_customer_count:qk]' pivot='key' type='quantitative' /></datasource-dependencies>
+          
+          <computed-sort column='[federated.customers].[none:next_best_action:nk]' direction='DESC' using='[federated.customers].[usr:Calculation_customer_count:qk]' />
+          
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Bar' />
+            
+            <encodings><text column='[federated.customers].[usr:Calculation_customer_count:qk]' /></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#2a78d6' /><format attr='mark-labels-show' value='true' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows>[federated.customers].[none:next_best_action:nk]</rows>
+        <cols>[federated.customers].[usr:Calculation_customer_count:qk]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="4.3 Category performance">
+      <table>
+        <view>
+          <datasources><datasource caption='category_performance' name='federated.categoryperformance' /></datasources>
+          
+          <datasource-dependencies datasource='federated.categoryperformance'><column caption="Product Category" datatype='string' name='[product_category]' role='dimension' type='nominal' /><column caption="Item Revenue (R$ K)" datatype='real' name='[Calculation_item_revenue_k]' role='measure' type='quantitative'><calculation class='tableau' formula="SUM([item_revenue]) / 1000" /></column><column caption="Avg Review Score" datatype='real' name='[avg_review_score]' role='measure' type='quantitative' /><column caption="Revenue Rank" datatype='integer' name='[revenue_rank]' role='measure' type='quantitative' /><column caption="Item Revenue" datatype='real' name='[item_revenue]' role='measure' type='quantitative' /><column-instance column='[product_category]' derivation='None' name='[none:product_category:nk]' pivot='key' type='nominal' /><column-instance column='[Calculation_item_revenue_k]' derivation='User' name='[usr:Calculation_item_revenue_k:qk]' pivot='key' type='quantitative' /><column-instance column='[avg_review_score]' derivation='Avg' name='[avg:avg_review_score:qk]' pivot='key' type='quantitative' /><column-instance column='[revenue_rank]' derivation='None' name='[none:revenue_rank:qk]' pivot='key' type='quantitative' /></datasource-dependencies>
+          <filter class='quantitative' column='[federated.categoryperformance].[none:revenue_rank:qk]' included-values='in-range'><min>1</min><max>15</max></filter>
+          <computed-sort column='[federated.categoryperformance].[none:product_category:nk]' direction='DESC' using='[federated.categoryperformance].[usr:Calculation_item_revenue_k:qk]' />
+          <slices><column>[federated.categoryperformance].[none:revenue_rank:qk]</column></slices>
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Bar' />
+            
+            <encodings><color column='[federated.categoryperformance].[avg:avg_review_score:qk]' /></encodings>
+            <style />
+          </pane>
+        </panes>
+        <rows>[federated.categoryperformance].[none:product_category:nk]</rows>
+        <cols>[federated.categoryperformance].[usr:Calculation_item_revenue_k:qk]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="5.2a KPI Reached">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /><datasource name='Parameters' /></datasources>
+          <datasource-dependencies datasource='Parameters'><column caption='Marketing Budget (R$)' datatype='real' name='[Parameter 1]' param-domain-type='range' role='measure' type='quantitative' value='25000.'><calculation class='tableau' formula='25000.' /><range granularity='5000.' max='200000.' min='0.' /></column></datasource-dependencies>
+          <datasource-dependencies datasource='federated.customers'><column caption="KPI Customers In Budget" datatype='integer' name='[Calculation_kpi_budget_customers]' role='measure' type='quantitative'><calculation class='tableau' formula="SUM(IIF([cumulative_action_cost_brl] &lt;= [Parameters].[Parameter 1], 1, 0))" /></column><column caption="Cumulative Action Cost Brl" datatype='real' name='[cumulative_action_cost_brl]' role='measure' type='quantitative' /><column-instance column='[Calculation_kpi_budget_customers]' derivation='User' name='[usr:Calculation_kpi_budget_customers:qk]' pivot='key' type='quantitative' /></datasource-dependencies>
+          
+          
+          
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Text' />
+            <customized-label><formatted-text><run fontcolor='#52514e' fontsize='11'>Customers reached</run><run>Æ&#10;</run><run fontcolor='#0b0b0b' fontsize='26'></run><run bold='true' fontcolor='#0b0b0b' fontsize='26'>&lt;[federated.customers].[usr:Calculation_kpi_budget_customers:qk]&gt;</run><run fontcolor='#0b0b0b' fontsize='26'></run></formatted-text></customized-label>
+            <encodings><text column='[federated.customers].[usr:Calculation_kpi_budget_customers:qk]' /></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#2a78d6' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows></rows>
+        <cols></cols>
+      </table>
+    </worksheet>
+    <worksheet name="5.2b KPI Spend">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /><datasource name='Parameters' /></datasources>
+          <datasource-dependencies datasource='Parameters'><column caption='Marketing Budget (R$)' datatype='real' name='[Parameter 1]' param-domain-type='range' role='measure' type='quantitative' value='25000.'><calculation class='tableau' formula='25000.' /><range granularity='5000.' max='200000.' min='0.' /></column></datasource-dependencies>
+          <datasource-dependencies datasource='federated.customers'><column caption="KPI Budget Spend" datatype='real' name='[Calculation_kpi_budget_spend]' role='measure' type='quantitative'><calculation class='tableau' formula="ROUND(SUM(IIF([cumulative_action_cost_brl] &lt;= [Parameters].[Parameter 1], [action_cost_brl], 0)), 0)" /></column><column caption="Action Cost Brl" datatype='real' name='[action_cost_brl]' role='measure' type='quantitative' /><column caption="Cumulative Action Cost Brl" datatype='real' name='[cumulative_action_cost_brl]' role='measure' type='quantitative' /><column-instance column='[Calculation_kpi_budget_spend]' derivation='User' name='[usr:Calculation_kpi_budget_spend:qk]' pivot='key' type='quantitative' /></datasource-dependencies>
+          
+          
+          
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Text' />
+            <customized-label><formatted-text><run fontcolor='#52514e' fontsize='11'>Budget used</run><run>Æ&#10;</run><run fontcolor='#0b0b0b' fontsize='26'>R$ </run><run bold='true' fontcolor='#0b0b0b' fontsize='26'>&lt;[federated.customers].[usr:Calculation_kpi_budget_spend:qk]&gt;</run><run fontcolor='#0b0b0b' fontsize='26'></run></formatted-text></customized-label>
+            <encodings><text column='[federated.customers].[usr:Calculation_kpi_budget_spend:qk]' /></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#2a78d6' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows></rows>
+        <cols></cols>
+      </table>
+    </worksheet>
+    <worksheet name="5.2c KPI High Value">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /><datasource name='Parameters' /></datasources>
+          <datasource-dependencies datasource='Parameters'><column caption='Marketing Budget (R$)' datatype='real' name='[Parameter 1]' param-domain-type='range' role='measure' type='quantitative' value='25000.'><calculation class='tableau' formula='25000.' /><range granularity='5000.' max='200000.' min='0.' /></column></datasource-dependencies>
+          <datasource-dependencies datasource='federated.customers'><column caption="KPI High-Value In Budget" datatype='integer' name='[Calculation_kpi_budget_high_value]' role='measure' type='quantitative'><calculation class='tableau' formula="SUM(IIF([cumulative_action_cost_brl] &lt;= [Parameters].[Parameter 1] AND [value_tier] = 'High', 1, 0))" /></column><column caption="Value Tier" datatype='string' name='[value_tier]' role='dimension' type='nominal' /><column caption="Cumulative Action Cost Brl" datatype='real' name='[cumulative_action_cost_brl]' role='measure' type='quantitative' /><column-instance column='[Calculation_kpi_budget_high_value]' derivation='User' name='[usr:Calculation_kpi_budget_high_value:qk]' pivot='key' type='quantitative' /></datasource-dependencies>
+          
+          
+          
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Text' />
+            <customized-label><formatted-text><run fontcolor='#52514e' fontsize='11'>High-value customers reached</run><run>Æ&#10;</run><run fontcolor='#0b0b0b' fontsize='26'></run><run bold='true' fontcolor='#0b0b0b' fontsize='26'>&lt;[federated.customers].[usr:Calculation_kpi_budget_high_value:qk]&gt;</run><run fontcolor='#0b0b0b' fontsize='26'></run></formatted-text></customized-label>
+            <encodings><text column='[federated.customers].[usr:Calculation_kpi_budget_high_value:qk]' /></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#2a78d6' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows></rows>
+        <cols></cols>
+      </table>
+    </worksheet>
+    <worksheet name="5.2d KPI Revenue Share">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /><datasource name='Parameters' /></datasources>
+          <datasource-dependencies datasource='Parameters'><column caption='Marketing Budget (R$)' datatype='real' name='[Parameter 1]' param-domain-type='range' role='measure' type='quantitative' value='25000.'><calculation class='tableau' formula='25000.' /><range granularity='5000.' max='200000.' min='0.' /></column></datasource-dependencies>
+          <datasource-dependencies datasource='federated.customers'><column caption="KPI Revenue Share In Budget %" datatype='real' name='[Calculation_kpi_budget_rev_pct]' role='measure' type='quantitative'><calculation class='tableau' formula="ROUND(100 * SUM(IIF([cumulative_action_cost_brl] &lt;= [Parameters].[Parameter 1], [total_revenue], 0)) / SUM([total_revenue]), 1)" /></column><column caption="Total Revenue" datatype='real' name='[total_revenue]' role='measure' type='quantitative' /><column caption="Cumulative Action Cost Brl" datatype='real' name='[cumulative_action_cost_brl]' role='measure' type='quantitative' /><column-instance column='[Calculation_kpi_budget_rev_pct]' derivation='User' name='[usr:Calculation_kpi_budget_rev_pct:qk]' pivot='key' type='quantitative' /></datasource-dependencies>
+          
+          
+          
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Text' />
+            <customized-label><formatted-text><run fontcolor='#52514e' fontsize='11'>Share of historical revenue</run><run>Æ&#10;</run><run fontcolor='#0b0b0b' fontsize='26'></run><run bold='true' fontcolor='#0b0b0b' fontsize='26'>&lt;[federated.customers].[usr:Calculation_kpi_budget_rev_pct:qk]&gt;</run><run fontcolor='#0b0b0b' fontsize='26'>%</run></formatted-text></customized-label>
+            <encodings><text column='[federated.customers].[usr:Calculation_kpi_budget_rev_pct:qk]' /></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#2a78d6' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows></rows>
+        <cols></cols>
+      </table>
+    </worksheet>
+    <worksheet name="5.3 Budget curve">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /><datasource name='Parameters' /></datasources>
+          <datasource-dependencies datasource='Parameters'><column caption='Marketing Budget (R$)' datatype='real' name='[Parameter 1]' param-domain-type='range' role='measure' type='quantitative' value='25000.'><calculation class='tableau' formula='25000.' /><range granularity='5000.' max='200000.' min='0.' /></column></datasource-dependencies>
+          <datasource-dependencies datasource='federated.customers'><column caption="Cumulative Action Cost Brl" datatype='real' name='[cumulative_action_cost_brl]' role='measure' type='quantitative' /><column caption="Priority Rank" datatype='integer' name='[priority_rank]' role='measure' type='quantitative' /><column caption="Within Budget" datatype='boolean' name='[Calculation_within_budget]' role='dimension' type='nominal'><calculation class='tableau' formula="[cumulative_action_cost_brl] &lt;= [Parameters].[Parameter 1]" /></column><column-instance column='[cumulative_action_cost_brl]' derivation='Sum' name='[sum:cumulative_action_cost_brl:qk]' pivot='key' type='quantitative' /><column-instance column='[priority_rank]' derivation='None' name='[none:priority_rank:qk]' pivot='key' type='quantitative' /><column-instance column='[Calculation_within_budget]' derivation='None' name='[none:Calculation_within_budget:nk]' pivot='key' type='nominal' /></datasource-dependencies>
+          <filter class='quantitative' column='[federated.customers].[none:priority_rank:qk]' included-values='in-range'><min>1</min><max>40000</max></filter>
+          
+          <slices><column>[federated.customers].[none:priority_rank:qk]</column></slices>
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Line' />
+            
+            <encodings><color column='[federated.customers].[none:Calculation_within_budget:nk]' /></encodings>
+            <style />
+          </pane>
+        </panes>
+        <rows>[federated.customers].[sum:cumulative_action_cost_brl:qk]</rows>
+        <cols>[federated.customers].[none:priority_rank:qk]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="5.4 Actions in budget">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /><datasource name='Parameters' /></datasources>
+          <datasource-dependencies datasource='Parameters'><column caption='Marketing Budget (R$)' datatype='real' name='[Parameter 1]' param-domain-type='range' role='measure' type='quantitative' value='25000.'><calculation class='tableau' formula='25000.' /><range granularity='5000.' max='200000.' min='0.' /></column></datasource-dependencies>
+          <datasource-dependencies datasource='federated.customers'><column caption="Next Best Action" datatype='string' name='[next_best_action]' role='dimension' type='nominal' /><column caption="Customers" datatype='integer' name='[Calculation_customer_count]' role='measure' type='quantitative'><calculation class='tableau' formula="COUNTD([customer_unique_id])" /></column><column caption="Within Budget" datatype='boolean' name='[Calculation_within_budget]' role='dimension' type='nominal'><calculation class='tableau' formula="[cumulative_action_cost_brl] &lt;= [Parameters].[Parameter 1]" /></column><column caption="Customer Unique Id" datatype='string' name='[customer_unique_id]' role='dimension' type='nominal' /><column caption="Cumulative Action Cost Brl" datatype='real' name='[cumulative_action_cost_brl]' role='measure' type='quantitative' /><column-instance column='[next_best_action]' derivation='None' name='[none:next_best_action:nk]' pivot='key' type='nominal' /><column-instance column='[Calculation_customer_count]' derivation='User' name='[usr:Calculation_customer_count:qk]' pivot='key' type='quantitative' /><column-instance column='[Calculation_within_budget]' derivation='None' name='[none:Calculation_within_budget:nk]' pivot='key' type='nominal' /></datasource-dependencies>
+          <filter class='categorical' column='[federated.customers].[none:Calculation_within_budget:nk]'><groupfilter function='member' level='[none:Calculation_within_budget:nk]' member='true' user:ui-domain='database' user:ui-enumeration='inclusive' user:ui-marker='enumerate' /></filter>
+          <computed-sort column='[federated.customers].[none:next_best_action:nk]' direction='DESC' using='[federated.customers].[usr:Calculation_customer_count:qk]' />
+          <slices><column>[federated.customers].[none:Calculation_within_budget:nk]</column></slices>
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Bar' />
+            
+            <encodings><text column='[federated.customers].[usr:Calculation_customer_count:qk]' /></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#eb6834' /><format attr='mark-labels-show' value='true' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows>[federated.customers].[none:next_best_action:nk]</rows>
+        <cols>[federated.customers].[usr:Calculation_customer_count:qk]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="5.5 Priority list">
+      <table>
+        <view>
+          <datasources><datasource caption='customers' name='federated.customers' /><datasource name='Parameters' /></datasources>
+          <datasource-dependencies datasource='Parameters'><column caption='Marketing Budget (R$)' datatype='real' name='[Parameter 1]' param-domain-type='range' role='measure' type='quantitative' value='25000.'><calculation class='tableau' formula='25000.' /><range granularity='5000.' max='200000.' min='0.' /></column></datasource-dependencies>
+          <datasource-dependencies datasource='federated.customers'><column caption="Priority Rank" datatype='integer' name='[priority_rank]' role='measure' type='quantitative' /><column caption="Customer" datatype='string' name='[Calculation_customer_short_id]' role='dimension' type='nominal'><calculation class='tableau' formula="LEFT([customer_unique_id], 8)" /></column><column caption="Customer State" datatype='string' name='[customer_state]' role='dimension' type='nominal' /><column caption="Customer Group" datatype='string' name='[customer_group]' role='dimension' type='nominal' /><column caption="Next Best Action" datatype='string' name='[next_best_action]' role='dimension' type='nominal' /><column caption="Return Probability %" datatype='real' name='[Calculation_return_prob_pct]' role='dimension' type='ordinal'><calculation class='tableau' formula="ROUND(100 * [return_probability], 2)" /></column><column caption="Priority Score" datatype='real' name='[priority_score]' role='measure' type='quantitative' /><column caption="Within Budget" datatype='boolean' name='[Calculation_within_budget]' role='dimension' type='nominal'><calculation class='tableau' formula="[cumulative_action_cost_brl] &lt;= [Parameters].[Parameter 1]" /></column><column caption="Customer Unique Id" datatype='string' name='[customer_unique_id]' role='dimension' type='nominal' /><column caption="Return Probability" datatype='real' name='[return_probability]' role='measure' type='quantitative' /><column caption="Cumulative Action Cost Brl" datatype='real' name='[cumulative_action_cost_brl]' role='measure' type='quantitative' /><column-instance column='[priority_rank]' derivation='None' name='[none:priority_rank:ok]' pivot='key' type='ordinal' /><column-instance column='[Calculation_customer_short_id]' derivation='None' name='[none:Calculation_customer_short_id:nk]' pivot='key' type='nominal' /><column-instance column='[customer_state]' derivation='None' name='[none:customer_state:nk]' pivot='key' type='nominal' /><column-instance column='[customer_group]' derivation='None' name='[none:customer_group:nk]' pivot='key' type='nominal' /><column-instance column='[next_best_action]' derivation='None' name='[none:next_best_action:nk]' pivot='key' type='nominal' /><column-instance column='[Calculation_return_prob_pct]' derivation='None' name='[none:Calculation_return_prob_pct:ok]' pivot='key' type='ordinal' /><column-instance column='[priority_score]' derivation='Sum' name='[sum:priority_score:qk]' pivot='key' type='quantitative' /><column-instance column='[Calculation_within_budget]' derivation='None' name='[none:Calculation_within_budget:nk]' pivot='key' type='nominal' /><column-instance column='[priority_rank]' derivation='None' name='[none:priority_rank:qk]' pivot='key' type='quantitative' /></datasource-dependencies>
+          <filter class='categorical' column='[federated.customers].[none:Calculation_within_budget:nk]'><groupfilter function='member' level='[none:Calculation_within_budget:nk]' member='true' user:ui-domain='database' user:ui-enumeration='inclusive' user:ui-marker='enumerate' /></filter><filter class='quantitative' column='[federated.customers].[none:priority_rank:qk]' included-values='in-range'><min>1</min><max>100</max></filter>
+          
+          <slices><column>[federated.customers].[none:Calculation_within_budget:nk]</column><column>[federated.customers].[none:priority_rank:qk]</column></slices>
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Text' />
+            
+            <encodings><text column='[federated.customers].[sum:priority_score:qk]' /></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#2a78d6' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows>[federated.customers].[none:priority_rank:ok] / [federated.customers].[none:Calculation_customer_short_id:nk] / [federated.customers].[none:customer_state:nk] / [federated.customers].[none:customer_group:nk] / [federated.customers].[none:next_best_action:nk] / [federated.customers].[none:Calculation_return_prob_pct:ok]</rows>
+        <cols></cols>
+      </table>
+    </worksheet>
+    <worksheet name="6.1 Model lift by decile">
+      <table>
+        <view>
+          <datasources><datasource caption='model_lift_by_decile' name='federated.modelliftbydecile' /></datasources>
+          
+          <datasource-dependencies datasource='federated.modelliftbydecile'><column caption="Lift" datatype='real' name='[lift]' role='measure' type='quantitative' /><column caption="Decile" datatype='integer' name='[decile]' role='measure' type='quantitative' /><column-instance column='[lift]' derivation='Sum' name='[sum:lift:qk]' pivot='key' type='quantitative' /><column-instance column='[decile]' derivation='None' name='[none:decile:ok]' pivot='key' type='ordinal' /></datasource-dependencies>
+          
+          
+          
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view><breakdown value='auto' /></view>
+            <mark class='Bar' />
+            
+            <encodings><text column='[federated.modelliftbydecile].[sum:lift:qk]' /></encodings>
+            <style><style-rule element='mark'><format attr='mark-color' value='#2a78d6' /><format attr='mark-labels-show' value='true' /></style-rule></style>
+          </pane>
+        </panes>
+        <rows>[federated.modelliftbydecile].[sum:lift:qk]</rows>
+        <cols>[federated.modelliftbydecile].[none:decile:ok]</cols>
+      </table>
+    </worksheet>
+  </worksheets>
+  <dashboards>
+    <dashboard name="Executive Overview">
+      <style />
+      <size maxheight='800' maxwidth='1200' minheight='800' minwidth='1200' />
+      <zones><zone h='100000' id='1' type-v2='layout-basic' w='100000' x='0' y='0' /><zone h='4250' id='2' type-v2='text' w='96667' x='1667' y='1500'><formatted-text><run bold='true' fontcolor='#0b0b0b' fontsize='18'>Customer Retention Intelligence: Executive Overview</run></formatted-text></zone><zone h='2750' id='3' type-v2='text' w='96667' x='1667' y='5500'><formatted-text><run fontcolor='#52514e' fontsize='11'>Olist marketplace · valid purchases Sep 2016 – Aug 2018 · revenue in BRL</run></formatted-text></zone><zone h='2750' id='4' type-v2='text' w='96667' x='1667' y='8750'><formatted-text><run fontcolor='#2a78d6' fontsize='10'>[Executive Overview]   ·   Customer Segmentation   ·   Retention Intelligence   ·   Growth Opportunities   ·   Marketing Prioritization   ·   Model Card</run></formatted-text></zone><zone h='12500' id='5' name="1.1a KPI Revenue" show-title='false' w='15417' x='1667' y='13750' /><zone h='12500' id='6' name="1.1b KPI Orders" show-title='false' w='15417' x='17917' y='13750' /><zone h='12500' id='7' name="1.1c KPI Customers" show-title='false' w='15417' x='34167' y='13750' /><zone h='12500' id='8' name="1.1d KPI AOV" show-title='false' w='15417' x='50417' y='13750' /><zone h='12500' id='9' name="1.1e KPI Repeat" show-title='false' w='15417' x='66667' y='13750' /><zone h='12500' id='10' name="1.1f KPI High Value" show-title='false' w='15417' x='82917' y='13750' /><zone h='33750' id='11' name="1.2 Monthly revenue" show-title='true' w='96667' x='1667' y='28125' /><zone h='33750' id='12' name="1.3 New customers per month" show-title='true' w='47917' x='1667' y='63125' /><zone h='33750' id='13' name="1.4 Returning customer share" show-title='true' w='47917' x='50417' y='63125' /><zone h='2750' id='14' type-v2='text' w='96667' x='1667' y='97000'><formatted-text><run fontcolor='#52514e' fontsize='9'>Returning customers grew from ~0.1% to ~3% of monthly buyers, still a small minority. Low-volume months (2016-09, 2016-12, 2018-09) are excluded.</run></formatted-text></zone></zones>
+    </dashboard>
+    <dashboard name="Customer Segmentation">
+      <style />
+      <size maxheight='800' maxwidth='1200' minheight='800' minwidth='1200' />
+      <zones><zone h='100000' id='1' type-v2='layout-basic' w='100000' x='0' y='0' /><zone h='4250' id='2' type-v2='text' w='96667' x='1667' y='1500'><formatted-text><run bold='true' fontcolor='#0b0b0b' fontsize='18'>Who Are Our Customers?</run></formatted-text></zone><zone h='2750' id='3' type-v2='text' w='96667' x='1667' y='5500'><formatted-text><run fontcolor='#52514e' fontsize='11'>RFM segments, value distribution and lifecycle stage · 94,990 customers as of 2018-09-03</run></formatted-text></zone><zone h='2750' id='4' type-v2='text' w='96667' x='1667' y='8750'><formatted-text><run fontcolor='#2a78d6' fontsize='10'>Executive Overview   ·   [Customer Segmentation]   ·   Retention Intelligence   ·   Growth Opportunities   ·   Marketing Prioritization   ·   Model Card</run></formatted-text></zone><zone h='42500' id='5' name="2.1 RFM segments" show-title='true' w='48333' x='1667' y='13750' /><zone h='42500' id='6' name="2.2 Recency x Monetary" show-title='true' w='47500' x='50833' y='13750' /><zone h='38750' id='7' name="2.3 Value distribution" show-title='true' w='48333' x='1667' y='57500' /><zone h='38750' id='8' name="2.4 Lifecycle stage" show-title='true' w='47500' x='50833' y='57500' /><zone h='4250' id='9' mode='checkdropdown' name='2.1 RFM segments' param='[federated.customers].[none:customer_state:nk]' type-v2='filter' w='23333' x='75000' y='8750' /><zone h='2750' id='10' type-v2='text' w='96667' x='1667' y='97000'><formatted-text><run fontcolor='#52514e' fontsize='9'>Recency (R) and Monetary (M) scores run 1-5 (5 = best). Frequency is omitted from the matrix: 97.8% of customers bought once.</run></formatted-text></zone></zones>
+    </dashboard>
+    <dashboard name="Retention Intelligence">
+      <style />
+      <size maxheight='800' maxwidth='1200' minheight='800' minwidth='1200' />
+      <zones><zone h='100000' id='1' type-v2='layout-basic' w='100000' x='0' y='0' /><zone h='4250' id='2' type-v2='text' w='96667' x='1667' y='1500'><formatted-text><run bold='true' fontcolor='#0b0b0b' fontsize='18'>Who Is Slipping Away?</run></formatted-text></zone><zone h='2750' id='3' type-v2='text' w='96667' x='1667' y='5500'><formatted-text><run fontcolor='#52514e' fontsize='11'>Predicted return likelihood, high-value customers at risk and cohort retention</run></formatted-text></zone><zone h='2750' id='4' type-v2='text' w='96667' x='1667' y='8750'><formatted-text><run fontcolor='#2a78d6' fontsize='10'>Executive Overview   ·   Customer Segmentation   ·   [Retention Intelligence]   ·   Growth Opportunities   ·   Marketing Prioritization   ·   Model Card</run></formatted-text></zone><zone h='37500' id='5' name="3.1 Risk distribution" show-title='true' w='30833' x='1667' y='13750' /><zone h='37500' id='6' name="3.2 Value x risk" show-title='true' w='31667' x='33333' y='13750' /><zone h='37500' id='7' name="3.3 Activity by value tier" show-title='true' w='32500' x='65833' y='13750' /><zone h='43750' id='8' name="3.4 Cohort retention" show-title='true' w='96667' x='1667' y='52500' /><zone h='2750' id='9' type-v2='text' w='96667' x='1667' y='97000'><formatted-text><run fontcolor='#52514e' fontsize='9'>Risk tiers rank customers by the model's predicted chance of buying again within 180 days. No customer is labelled 'churned': the data has no churn event.</run></formatted-text></zone></zones>
+    </dashboard>
+    <dashboard name="Growth Opportunities">
+      <style />
+      <size maxheight='800' maxwidth='1200' minheight='800' minwidth='1200' />
+      <zones><zone h='100000' id='1' type-v2='layout-basic' w='100000' x='0' y='0' /><zone h='4250' id='2' type-v2='text' w='96667' x='1667' y='1500'><formatted-text><run bold='true' fontcolor='#0b0b0b' fontsize='18'>Where Is the Opportunity?</run></formatted-text></zone><zone h='2750' id='3' type-v2='text' w='96667' x='1667' y='5500'><formatted-text><run fontcolor='#52514e' fontsize='11'>Retention groups, recommended next-best actions and category performance</run></formatted-text></zone><zone h='2750' id='4' type-v2='text' w='96667' x='1667' y='8750'><formatted-text><run fontcolor='#2a78d6' fontsize='10'>Executive Overview   ·   Customer Segmentation   ·   Retention Intelligence   ·   [Growth Opportunities]   ·   Marketing Prioritization   ·   Model Card</run></formatted-text></zone><zone h='42500' id='5' name="4.1 Opportunity map" show-title='true' w='48333' x='1667' y='13750' /><zone h='42500' id='6' name="4.2 Next best actions" show-title='true' w='47500' x='50833' y='13750' /><zone h='38750' id='7' name="4.3 Category performance" show-title='true' w='96667' x='1667' y='57500' /><zone h='2750' id='8' type-v2='text' w='96667' x='1667' y='97000'><formatted-text><run fontcolor='#52514e' fontsize='9'>Bubble size = customers. Category colour = average review score (low scores stand out). Expected revenue figures are model estimates if no action is taken.</run></formatted-text></zone></zones>
+    </dashboard>
+    <dashboard name="Marketing Prioritization">
+      <style />
+      <size maxheight='800' maxwidth='1200' minheight='800' minwidth='1200' />
+      <zones><zone h='100000' id='1' type-v2='layout-basic' w='100000' x='0' y='0' /><zone h='4250' id='2' type-v2='text' w='96667' x='1667' y='1500'><formatted-text><run bold='true' fontcolor='#0b0b0b' fontsize='18'>Who Should We Contact First?</run></formatted-text></zone><zone h='2750' id='3' type-v2='text' w='96667' x='1667' y='5500'><formatted-text><run fontcolor='#52514e' fontsize='11'>Customers ranked by priority score · move the budget slider · action costs are illustrative</run></formatted-text></zone><zone h='2750' id='4' type-v2='text' w='96667' x='1667' y='8750'><formatted-text><run fontcolor='#2a78d6' fontsize='10'>Executive Overview   ·   Customer Segmentation   ·   Retention Intelligence   ·   Growth Opportunities   ·   [Marketing Prioritization]   ·   Model Card</run></formatted-text></zone><zone h='12500' id='5' name="5.2a KPI Reached" show-title='false' w='17500' x='26667' y='13750' /><zone h='12500' id='6' name="5.2b KPI Spend" show-title='false' w='17500' x='45000' y='13750' /><zone h='12500' id='7' name="5.2c KPI High Value" show-title='false' w='17500' x='63333' y='13750' /><zone h='12500' id='8' name="5.2d KPI Revenue Share" show-title='false' w='16667' x='81667' y='13750' /><zone h='31250' id='9' name="5.3 Budget curve" show-title='true' w='48333' x='1667' y='27500' /><zone h='31250' id='10' name="5.4 Actions in budget" show-title='true' w='47500' x='50833' y='27500' /><zone h='36250' id='11' name="5.5 Priority list" show-title='true' w='96667' x='1667' y='60000' /><zone h='12500' id='12' mode='slider' param='[Parameters].[Parameter 1]' type-v2='paramctrl' w='24167' x='1667' y='13750' /><zone h='2750' id='13' type-v2='text' w='96667' x='1667' y='97000'><formatted-text><run fontcolor='#52514e' fontsize='9'>Priority = 45% value + 35% predicted return likelihood + 20% urgency. The effect of each action must be measured with an A/B test.</run></formatted-text></zone></zones>
+    </dashboard>
+    <dashboard name="Model Card">
+      <style />
+      <size maxheight='800' maxwidth='1200' minheight='800' minwidth='1200' />
+      <zones><zone h='100000' id='1' type-v2='layout-basic' w='100000' x='0' y='0' /><zone h='4250' id='2' type-v2='text' w='96667' x='1667' y='1500'><formatted-text><run bold='true' fontcolor='#0b0b0b' fontsize='18'>How Good Is the Model?</run></formatted-text></zone><zone h='2750' id='3' type-v2='text' w='96667' x='1667' y='5500'><formatted-text><run fontcolor='#52514e' fontsize='11'>Out-of-time test: customers as of 2018-03-01, did they buy again within 180 days?</run></formatted-text></zone><zone h='2750' id='4' type-v2='text' w='96667' x='1667' y='8750'><formatted-text><run fontcolor='#2a78d6' fontsize='10'>Executive Overview   ·   Customer Segmentation   ·   Retention Intelligence   ·   Growth Opportunities   ·   Marketing Prioritization   ·   [Model Card]</run></formatted-text></zone><zone h='65000' id='5' name="6.1 Model lift by decile" show-title='true' w='96667' x='1667' y='13750' /><zone h='2750' id='6' type-v2='text' w='96667' x='1667' y='97000'><formatted-text><run fontcolor='#52514e' fontsize='9'>ROC-AUC 0.586 (random 0.519). Top 10% lift 2.0x vs 1.9x for an RFM rule and 1.5x for 'most recent first'. Use scores to rank customers, not as exact probabilities.</run></formatted-text></zone></zones>
+    </dashboard>
+  </dashboards>
+  <windows source-height='30'><window class='dashboard' maximized='true' name="Executive Overview"><viewpoints /></window><window class='dashboard' maximized='true' name="Customer Segmentation"><viewpoints /></window><window class='dashboard' maximized='true' name="Retention Intelligence"><viewpoints /></window><window class='dashboard' maximized='true' name="Growth Opportunities"><viewpoints /></window><window class='dashboard' maximized='true' name="Marketing Prioritization"><viewpoints /></window><window class='dashboard' maximized='true' name="Model Card"><viewpoints /></window><window class='worksheet' hidden='true' name="1.1a KPI Revenue" /><window class='worksheet' hidden='true' name="1.1b KPI Orders" /><window class='worksheet' hidden='true' name="1.1c KPI Customers" /><window class='worksheet' hidden='true' name="1.1d KPI AOV" /><window class='worksheet' hidden='true' name="1.1e KPI Repeat" /><window class='worksheet' hidden='true' name="1.1f KPI High Value" /><window class='worksheet' hidden='true' name="1.2 Monthly revenue" /><window class='worksheet' hidden='true' name="1.3 New customers per month" /><window class='worksheet' hidden='true' name="1.4 Returning customer share" /><window class='worksheet' hidden='true' name="2.1 RFM segments" /><window class='worksheet' hidden='true' name="2.2 Recency x Monetary" /><window class='worksheet' hidden='true' name="2.3 Value distribution" /><window class='worksheet' hidden='true' name="2.4 Lifecycle stage" /><window class='worksheet' hidden='true' name="3.1 Risk distribution" /><window class='worksheet' hidden='true' name="3.2 Value x risk" /><window class='worksheet' hidden='true' name="3.3 Activity by value tier" /><window class='worksheet' hidden='true' name="3.4 Cohort retention" /><window class='worksheet' hidden='true' name="4.1 Opportunity map" /><window class='worksheet' hidden='true' name="4.2 Next best actions" /><window class='worksheet' hidden='true' name="4.3 Category performance" /><window class='worksheet' hidden='true' name="5.2a KPI Reached" /><window class='worksheet' hidden='true' name="5.2b KPI Spend" /><window class='worksheet' hidden='true' name="5.2c KPI High Value" /><window class='worksheet' hidden='true' name="5.2d KPI Revenue Share" /><window class='worksheet' hidden='true' name="5.3 Budget curve" /><window class='worksheet' hidden='true' name="5.4 Actions in budget" /><window class='worksheet' hidden='true' name="5.5 Priority list" /><window class='worksheet' hidden='true' name="6.1 Model lift by decile" /></windows>
+</workbook>

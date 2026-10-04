@@ -6,6 +6,7 @@ Run on 2026-10-04 with dbt 1.12.5 and dbt-snowflake 1.12.1.
 `dbt build` → **PASS = 128, WARN = 0, ERROR = 0**
 - 21 models: 13 views (9 staging + 4 intermediate) and 8 tables (4 core marts + 4 metric marts)
 - 107 data tests: generic `unique`, `not_null`, `relationships`, `accepted_values` + 6 custom tests
+- *Sprint 4 added `cohort_retention` (+5 tests): the project now has **22 models and 112 tests** (`dbt build` PASS = 134).*
 
 | Custom test | Checks |
 |---|---|

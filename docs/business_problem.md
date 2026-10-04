@@ -22,7 +22,7 @@ service recovery) to get the biggest return.
 ## Success criteria for the project
 
 - Every customer (`customer_unique_id`) gets a value segment, an activity status and a priority level.
-- Business users can filter the prioritised list by state and category in Tableau/Streamlit.
+- Business users can filter the prioritised list by state and category in Tableau (Dashboard 5).
 - Every metric traces back to a documented column in [data_dictionary.md](data_dictionary.md).
 
 ## Assumptions and limits (stated up front)

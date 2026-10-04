@@ -121,7 +121,7 @@ Source `product_category_name_translation.csv` · Grain: one row per category ·
 | Check | Script | Result | Notes |
 |---|---|---|---|
 | Row counts | `05_row_count_validation.sql` | ✅ PASS | |
-| Required columns not null | `06_null_checks.sql` | ✅ PASS | 13 INFO — see validation_results.md |
+| Required columns not null | `06_null_checks.sql` | ✅ PASS | 13 INFO — see sprint_1_results.md |
 | Primary keys unique | `07_duplicate_checks.sql` | ✅ PASS | |
-| Schema & value domains | `08_data_type_validation.sql` | ✅ PASS | 7 WARN — see validation_results.md |
-| Relationships | `09_relationship_checks.sql` | ✅ PASS | 5 WARN — see validation_results.md |
+| Schema & value domains | `08_data_type_validation.sql` | ✅ PASS | 7 WARN — see sprint_1_results.md |
+| Relationships | `09_relationship_checks.sql` | ✅ PASS | 5 WARN — see sprint_1_results.md |
